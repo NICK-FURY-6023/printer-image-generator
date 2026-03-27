@@ -33,7 +33,9 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'PUT') {
-    const { name, label_data } = req.body;
+    const name = (req.body.name || '').trim();
+    const label_data = req.body.label_data;
+    if (!name || name.length > 100) return res.status(400).json({ error: 'Template name required (max 100 chars)' });
     const { data, error } = await supabase.from('templates').update({ name, label_data }).eq('id', id).select().single();
     if (error) return res.status(500).json({ error: error.message });
     return res.json(data);

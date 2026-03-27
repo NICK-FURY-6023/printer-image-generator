@@ -32,8 +32,12 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'POST') {
-    const { name, label_data } = req.body;
-    if (!name || !label_data) return res.status(400).json({ error: 'name and label_data required' });
+    const name = (req.body.name || '').trim();
+    const label_data = req.body.label_data;
+    if (!name || name.length > 100) return res.status(400).json({ error: 'Template name required (max 100 chars)' });
+    if (!Array.isArray(label_data) || label_data.length < 1 || label_data.length > 12) {
+      return res.status(400).json({ error: 'label_data must be array of 1-12 labels' });
+    }
     const { data, error } = await supabase.from('templates').insert([{ name, label_data }]).select().single();
     if (error) return res.status(500).json({ error: error.message });
     return res.status(201).json(data);

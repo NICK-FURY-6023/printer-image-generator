@@ -94,6 +94,10 @@ function CSVImportModal({ onImport, onClose }) {
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (file.size > 1024 * 1024) {
+      setError('File too large (max 1MB)');
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (ev) => handleText(ev.target.result);
     reader.readAsText(file);
@@ -289,14 +293,19 @@ export default function Dashboard() {
   const autoSaveTimer = useRef(null);
 
   // Auto-save draft
+  const autoFadeTimer = useRef(null);
   useEffect(() => {
     clearTimeout(autoSaveTimer.current);
     autoSaveTimer.current = setTimeout(() => {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(labels));
+      try { localStorage.setItem(DRAFT_KEY, JSON.stringify(labels)); } catch { /* quota exceeded */ }
       setAutoSaved(true);
-      setTimeout(() => setAutoSaved(false), 2000);
+      clearTimeout(autoFadeTimer.current);
+      autoFadeTimer.current = setTimeout(() => setAutoSaved(false), 2000);
     }, 1200);
-    return () => clearTimeout(autoSaveTimer.current);
+    return () => {
+      clearTimeout(autoSaveTimer.current);
+      clearTimeout(autoFadeTimer.current);
+    };
   }, [labels]);
 
   // Keyboard shortcuts
@@ -356,10 +365,18 @@ export default function Dashboard() {
     toast.success('JSON exported');
   };
 
+  const jsonInputRef = useRef(null);
+
   const handleJSONImport = () => {
-    const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
-    input.onchange = (e) => {
+    if (!jsonInputRef.current) {
+      jsonInputRef.current = document.createElement('input');
+      jsonInputRef.current.type = 'file';
+      jsonInputRef.current.accept = '.json';
+    }
+    jsonInputRef.current.value = '';
+    jsonInputRef.current.onchange = (e) => {
       const file = e.target.files[0]; if (!file) return;
+      if (file.size > 1024 * 1024) { toast.error('File too large (max 1MB)'); return; }
       const reader = new FileReader();
       reader.onload = (ev) => {
         try {
@@ -374,7 +391,7 @@ export default function Dashboard() {
       };
       reader.readAsText(file);
     };
-    input.click();
+    jsonInputRef.current.click();
   };
 
   const filledCount = labels.filter(l => l.product?.trim()).length;
@@ -442,7 +459,7 @@ export default function Dashboard() {
               Reset
             </Btn>
             <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.2)' }} />
-            <Btn onClick={() => { logout(); toast('Logged out'); navigate('/'); }} variant="ghost" style={{ padding: '7px 10px' }}>
+            <Btn onClick={() => { logout(); toast('Logged out'); navigate('/', { replace: true }); }} variant="ghost" style={{ padding: '7px 10px' }}>
               <Icon d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
               Logout
             </Btn>

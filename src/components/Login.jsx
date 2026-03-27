@@ -19,7 +19,13 @@ export default function Login() {
       await login(email, password);
       navigate('/app');
     } catch (err) {
-      setError(err?.response?.data?.error || 'Invalid credentials. Please try again.');
+      if (err?.response?.data?.error) {
+        setError(err.response.data.error);
+      } else if (err?.code === 'ERR_NETWORK' || err?.message === 'Network Error') {
+        setError('Network error. Check your connection.');
+      } else {
+        setError('Login failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

@@ -39,7 +39,7 @@ function LabelCell({ label, fontScale = 1 }) {
   const brandName = label.manufacturer?.trim()
     ? label.manufacturer.trim().split(/\s+/).slice(0, 2).join(' ').toUpperCase()
     : '';
-  const qrValue = label.code?.trim() || label.product?.trim() || 'N/A';
+  const qrValue = (label.code?.trim() || label.product?.trim() || 'N/A').substring(0, 100);
 
   const fs = (pt) => `${(pt * fontScale).toFixed(2)}pt`;
 
