@@ -219,6 +219,7 @@ graph TD
 | **PDF Generation** | jsPDF + html2canvas | 2.5 / 1.4 |
 | **Notifications** | react-hot-toast | 2.6 |
 | **Backend** | Vercel Serverless Functions | Node.js |
+| **Database Client** | Supabase JS Client | 2.x |
 | **Database** | Supabase (PostgreSQL) | — |
 | **Auth** | jsonwebtoken + bcryptjs | 9.0 / 2.4 |
 
@@ -255,6 +256,8 @@ printer-image-generator/
 │       └── api.js             # Axios client + auth interceptor
 │
 ├── 📁 api/                    # Vercel Serverless Functions
+│   ├── 📁 _lib/
+│   │   └── db.js              # Shared DB layer (Supabase JS client)
 │   ├── 📁 auth/
 │   │   ├── login.js           # POST — authenticate, return JWT
 │   │   └── verify.js          # GET — validate JWT token
@@ -270,7 +273,8 @@ printer-image-generator/
 │
 ├── 📁 scripts/
 │   ├── generate-hash.js       # CLI: bcrypt password hash generator
-│   └── generate-og.js         # CLI: OG image generator
+│   ├── generate-og.js         # CLI: OG image generator
+│   └── setup-db.sql           # Supabase database setup SQL
 │
 └── 📁 dist/                   # Production build output
 ```
@@ -356,7 +360,7 @@ JWT_SECRET=<generate-a-strong-random-string>
 ADMIN_EMAIL=shreeganpatiagency.printer@admin
 ADMIN_PASSWORD_HASH=<bcrypt-hash-of-your-password>
 
-# Supabase
+# Supabase Connection
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your-anon-key
 ```
@@ -370,23 +374,29 @@ npm run generate-hash -- "YourSecurePassword123"
 
 ### 4. Setup Supabase Database
 
-Run this SQL in your Supabase SQL Editor:
+Go to **Supabase Dashboard → SQL Editor** and run the SQL from `scripts/setup-db.sql`:
 
 ```sql
-CREATE TABLE templates (
+-- Creates templates table with proper permissions
+-- Full SQL is in scripts/setup-db.sql
+
+CREATE TABLE IF NOT EXISTS templates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id TEXT,
   name TEXT NOT NULL,
-  label_data JSONB NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  label_data JSONB NOT NULL DEFAULT '[]'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Enable Row Level Security (optional)
-ALTER TABLE templates ENABLE ROW LEVEL SECURITY;
+-- Grant access to Supabase roles
+GRANT ALL ON templates TO anon;
+GRANT ALL ON templates TO authenticated;
 
--- Allow all operations via anon key (for serverless functions)
-CREATE POLICY "Allow all" ON templates FOR ALL USING (true);
+-- Disable RLS (auth handled at API layer)
+ALTER TABLE templates DISABLE ROW LEVEL SECURITY;
 ```
+
+> ⚠️ **Important:** Without this step, templates save/load will not work!
 
 ### 5. Run Locally
 
@@ -440,10 +450,10 @@ Set environment variables in **Vercel Dashboard → Settings → Environment Var
 erDiagram
     TEMPLATES {
         uuid id PK "gen_random_uuid()"
-        text user_id "nullable"
         text name "NOT NULL"
         jsonb label_data "NOT NULL — array of 12 label objects"
         timestamptz created_at "DEFAULT NOW()"
+        timestamptz updated_at "DEFAULT NOW()"
     }
 
     LABEL_OBJECT {

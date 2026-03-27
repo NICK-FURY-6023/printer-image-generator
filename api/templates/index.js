@@ -1,9 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { createClient } = require('@supabase/supabase-js');
-
-function getSupabase() {
-  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-}
+const { db } = require('../_lib/db');
 
 function verifyToken(req) {
   const authHeader = req.headers.authorization;
@@ -23,25 +19,25 @@ module.exports = async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const supabase = getSupabase();
-
-  if (req.method === 'GET') {
-    const { data, error } = await supabase.from('templates').select('*').order('created_at', { ascending: false });
-    if (error) return res.status(500).json({ error: error.message });
-    return res.json(data);
-  }
-
-  if (req.method === 'POST') {
-    const name = (req.body.name || '').trim();
-    const label_data = req.body.label_data;
-    if (!name || name.length > 100) return res.status(400).json({ error: 'Template name required (max 100 chars)' });
-    if (!Array.isArray(label_data) || label_data.length < 1 || label_data.length > 12) {
-      return res.status(400).json({ error: 'label_data must be array of 1-12 labels' });
+  try {
+    if (req.method === 'GET') {
+      const data = await db.listTemplates();
+      return res.json(data);
     }
-    const { data, error } = await supabase.from('templates').insert([{ name, label_data }]).select().single();
-    if (error) return res.status(500).json({ error: error.message });
-    return res.status(201).json(data);
-  }
 
-  res.status(405).json({ error: 'Method not allowed' });
+    if (req.method === 'POST') {
+      const name = (req.body.name || '').trim();
+      const label_data = req.body.label_data;
+      if (!name || name.length > 100) return res.status(400).json({ error: 'Template name required (max 100 chars)' });
+      if (!Array.isArray(label_data) || label_data.length < 1 || label_data.length > 12) {
+        return res.status(400).json({ error: 'label_data must be array of 1-12 labels' });
+      }
+      const data = await db.createTemplate(name, label_data);
+      return res.status(201).json(data);
+    }
+
+    res.status(405).json({ error: 'Method not allowed' });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Internal server error' });
+  }
 };

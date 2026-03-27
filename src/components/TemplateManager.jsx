@@ -16,8 +16,13 @@ export default function TemplateManager({ mode, labels, onLoad, onClose }) {
     try {
       const data = await getTemplates();
       setTemplates(Array.isArray(data) ? data : []);
-    } catch {
-      toast.error('Could not load templates. Check Supabase config.');
+    } catch (err) {
+      const msg = err?.response?.data?.error || err?.message || '';
+      if (msg.includes('table not found') || msg.includes('does not exist')) {
+        toast.error('Templates table not found. Run setup SQL in Supabase Dashboard.');
+      } else {
+        toast.error('Could not load templates. Check Supabase config.');
+      }
     } finally {
       setLoading(false);
     }
