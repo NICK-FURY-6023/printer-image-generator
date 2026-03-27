@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import LabelEditor from './LabelEditor';
@@ -11,6 +12,7 @@ const DRAFT_KEY = 'ganpati_draft';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [labels, setLabels] = useState(() => {
     try {
       const saved = localStorage.getItem(DRAFT_KEY);
@@ -162,7 +164,7 @@ export default function Dashboard() {
               🗑 Reset
             </button>
             <div style={{ width: 1, height: 28, background: 'rgba(255,255,255,0.2)' }} />
-            <button onClick={() => { logout(); toast('Logged out'); }} style={{
+            <button onClick={() => { logout(); toast('Logged out'); navigate('/'); }} style={{
               background: 'rgba(255,255,255,0.1)', border: 'none', color: 'rgba(255,255,255,0.7)',
               borderRadius: 8, padding: '7px 12px', fontSize: 12, cursor: 'pointer',
             }}>

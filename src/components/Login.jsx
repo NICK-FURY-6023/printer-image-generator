@@ -158,17 +158,15 @@ export default function Login() {
           <p style={{ fontSize: 11, color: '#334155' }}>
             © {new Date().getFullYear()} Shree Ganpati Agency · Admin Access Only
           </p>
-          {onBack && (
-            <button
-              type="button"
-              onClick={onBack}
-              style={{ background: 'none', border: 'none', color: '#334155', fontSize: 12, cursor: 'pointer', marginTop: 8, display: 'block', margin: '8px auto 0', transition: 'color 0.15s' }}
-              onMouseOver={e => e.currentTarget.style.color = '#f97316'}
-              onMouseOut={e  => e.currentTarget.style.color = '#334155'}
-            >
-              ← Wapas Home
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            style={{ background: 'none', border: 'none', color: '#334155', fontSize: 12, cursor: 'pointer', marginTop: 8, display: 'block', margin: '8px auto 0', transition: 'color 0.15s' }}
+            onMouseOver={e => e.currentTarget.style.color = '#f97316'}
+            onMouseOut={e  => e.currentTarget.style.color = '#334155'}
+          >
+            ← Back to Home
+          </button>
         </div>
       </div>
     </div>
