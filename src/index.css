@@ -11,37 +11,54 @@
   @page { size: A4; margin: 0; }
 }
 
-.sheet {
-  width: 210mm;
-  height: 297mm;
-  display: grid;
-  grid-template-columns: repeat(2, 105mm);
-  grid-template-rows: repeat(6, 48mm);
-  padding-top: 4.5mm;
-  padding-bottom: 4.5mm;
-  background: white;
-  box-sizing: border-box;
-}
+/* ─── Label / Sheet styles (high specificity to override Tailwind resets) ── */
+@layer components {
+  .sheet {
+    width: 210mm;
+    height: 297mm;
+    display: grid;
+    grid-template-columns: repeat(2, 105mm);
+    grid-template-rows: repeat(6, 48mm);
+    padding-top: 4.5mm;
+    padding-bottom: 4.5mm;
+    background: white;
+    box-sizing: border-box;
+  }
 
-.label {
-  width: 105mm;
-  height: 48mm;
-  border: 0.4mm solid #000;
-  box-sizing: border-box;
-  padding: 1.5mm 2mm;
-  font-family: 'Arial Black', Arial, sans-serif;
-  font-size: 7pt;
-  color: #000;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-}
+  .label {
+    width: 105mm;
+    height: 48mm;
+    border: 0.4mm solid #000;
+    box-sizing: border-box;
+    padding: 1.5mm 2mm;
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-size: 7pt;
+    color: #000;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 
-.label-empty { color: #bbb; letter-spacing: 1px; }
-/* ───────────────────────────────────────────────────── */
+  .label table {
+    border-collapse: collapse;
+  }
+
+  .label th, .label td {
+    border: 0.3mm solid #000;
+    padding: 0.3mm 1.5mm;
+    color: #000;
+    font-weight: 800;
+  }
+
+  .label th {
+    font-weight: 900;
+  }
+
+  .label-empty { color: #bbb; letter-spacing: 1px; }
+}
 
 /* ─── Theme variables ─────────────────────────────── */
 :root {
@@ -173,38 +190,3 @@
 }
 .label-card:hover  { border-color: #475569; }
 .label-card.active { border-color: #f97316; box-shadow: 0 0 0 2px rgba(249,115,22,0.2); }
-
-
-.sheet {
-  width: 210mm;
-  height: 297mm;
-  display: grid;
-  grid-template-columns: repeat(2, 105mm);
-  grid-template-rows: repeat(6, 48mm);
-  padding-top: 4.5mm;
-  padding-bottom: 4.5mm;
-  background: white;
-  box-sizing: border-box;
-}
-
-.label {
-  width: 105mm;
-  height: 48mm;
-  border: 0.4mm solid #000;
-  box-sizing: border-box;
-  padding: 1.5mm 2mm;
-  font-family: 'Arial Black', Arial, sans-serif;
-  font-size: 7pt;
-  color: #000;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-}
-
-.label-empty {
-  color: #bbb;
-  letter-spacing: 1px;
-}
