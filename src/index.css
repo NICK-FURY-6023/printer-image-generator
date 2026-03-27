@@ -1,0 +1,256 @@
+@import "tailwindcss";
+
+/* ─── Print CSS (DO NOT TOUCH) ─────────────────────── */
+@media print {
+  body * { visibility: hidden; }
+  .print-sheet, .print-sheet * { visibility: visible; }
+  .print-sheet { position: fixed; top: 0; left: 0; }
+  .no-print { display: none !important; }
+  @page { size: A4; margin: 0; }
+}
+
+.sheet {
+  width: 210mm;
+  height: 297mm;
+  display: grid;
+  grid-template-columns: repeat(2, 105mm);
+  grid-template-rows: repeat(6, 48mm);
+  padding-top: 4.5mm;
+  padding-bottom: 4.5mm;
+  background: white;
+  box-sizing: border-box;
+}
+
+.label {
+  width: 105mm;
+  height: 48mm;
+  border: 0.3mm solid #999;
+  box-sizing: border-box;
+  padding: 1.5mm;
+  font-family: Arial, sans-serif;
+  font-size: 7pt;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.label-row {
+  display: flex;
+  width: 100%;
+  border-bottom: 0.2mm solid #ccc;
+  padding-bottom: 0.5mm;
+  margin-bottom: 0.5mm;
+}
+
+.label-row:last-child { border-bottom: none; }
+
+.label-brand { font-size: 9pt; font-weight: bold; flex: 1; }
+.label-product { font-size: 8.5pt; font-weight: bold; text-align: center; padding: 1mm 0; }
+.label-field { flex: 1; font-size: 7pt; }
+.label-field-value { font-weight: bold; }
+.label-empty { color: #999; letter-spacing: 1px; }
+.label-manufacturer { font-size: 6.5pt; color: #444; }
+/* ───────────────────────────────────────────────────── */
+
+/* ─── Theme variables ─────────────────────────────── */
+:root {
+  --saffron: #f97316;
+  --saffron-dark: #ea580c;
+  --gold: #eab308;
+  --gold-light: #fde047;
+  --dark: #0f172a;
+  --dark-card: #1e293b;
+  --dark-border: #334155;
+  --dark-muted: #475569;
+  --purple: #7c3aed;
+}
+
+/* ─── Animations ──────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(249,115,22,0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(249,115,22,0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.animate-fade-in    { animation: fadeIn 0.3s ease both; }
+.animate-slide-left { animation: slideInLeft 0.3s ease both; }
+.animate-spin-slow  { animation: spin 1s linear infinite; }
+
+/* ─── Glassmorphism ───────────────────────────────── */
+.glass {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* ─── Scrollbar ───────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* ─── Input focus ring ────────────────────────────── */
+.input-dark {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #f1f5f9;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+.input-dark::placeholder { color: #475569; }
+.input-dark:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249,115,22,0.15);
+}
+
+/* ─── Btn variants ────────────────────────────────── */
+.btn-saffron {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-saffron:hover:not(:disabled)  { opacity: 0.9; transform: translateY(-1px); }
+.btn-saffron:active:not(:disabled) { transform: translateY(0); }
+.btn-saffron:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-ghost {
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  font-size: 12px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-ghost:hover { background: #1e293b; color: #f1f5f9; border-color: #475569; }
+
+/* ─── Label dot navigator ─────────────────────────── */
+.label-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid #334155;
+  background: #1e293b;
+  color: #64748b;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.label-dot:hover           { border-color: #f97316; color: #f97316; }
+.label-dot.active          { background: #f97316; border-color: #f97316; color: white; }
+.label-dot.filled          { border-color: #22c55e; color: #22c55e; }
+.label-dot.active.filled   { background: #22c55e; border-color: #22c55e; color: white; }
+
+/* ─── Accordion card ──────────────────────────────── */
+.label-card {
+  border: 1px solid #334155;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.label-card:hover  { border-color: #475569; }
+.label-card.active { border-color: #f97316; box-shadow: 0 0 0 2px rgba(249,115,22,0.2); }
+
+
+.sheet {
+  width: 210mm;
+  height: 297mm;
+  display: grid;
+  grid-template-columns: repeat(2, 105mm);
+  grid-template-rows: repeat(6, 48mm);
+  padding-top: 4.5mm;
+  padding-bottom: 4.5mm;
+  background: white;
+  box-sizing: border-box;
+}
+
+.label {
+  width: 105mm;
+  height: 48mm;
+  border: 0.3mm solid #999;
+  box-sizing: border-box;
+  padding: 1.5mm;
+  font-family: Arial, sans-serif;
+  font-size: 7pt;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.label-row {
+  display: flex;
+  width: 100%;
+  border-bottom: 0.2mm solid #ccc;
+  padding-bottom: 0.5mm;
+  margin-bottom: 0.5mm;
+}
+
+.label-row:last-child {
+  border-bottom: none;
+}
+
+.label-brand {
+  font-size: 9pt;
+  font-weight: bold;
+  flex: 1;
+}
+
+.label-product {
+  font-size: 8.5pt;
+  font-weight: bold;
+  text-align: center;
+  padding: 1mm 0;
+}
+
+.label-field {
+  flex: 1;
+  font-size: 7pt;
+}
+
+.label-field-value {
+  font-weight: bold;
+}
+
+.label-empty {
+  color: #999;
+  letter-spacing: 1px;
+}
+
+.label-manufacturer {
+  font-size: 6.5pt;
+  color: #444;
+}
