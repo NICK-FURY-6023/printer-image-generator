@@ -26,33 +26,21 @@
 .label {
   width: 105mm;
   height: 48mm;
-  border: 0.3mm solid #999;
+  border: 0.4mm solid #000;
   box-sizing: border-box;
-  padding: 1.5mm;
-  font-family: Arial, sans-serif;
+  padding: 1.5mm 2mm;
+  font-family: 'Arial Black', Arial, sans-serif;
   font-size: 7pt;
+  color: #000;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
-.label-row {
-  display: flex;
-  width: 100%;
-  border-bottom: 0.2mm solid #ccc;
-  padding-bottom: 0.5mm;
-  margin-bottom: 0.5mm;
-}
-
-.label-row:last-child { border-bottom: none; }
-
-.label-brand { font-size: 9pt; font-weight: bold; flex: 1; }
-.label-product { font-size: 8.5pt; font-weight: bold; text-align: center; padding: 1mm 0; }
-.label-field { flex: 1; font-size: 7pt; }
-.label-field-value { font-weight: bold; }
-.label-empty { color: #999; letter-spacing: 1px; }
-.label-manufacturer { font-size: 6.5pt; color: #444; }
+.label-empty { color: #bbb; letter-spacing: 1px; }
 /* ───────────────────────────────────────────────────── */
 
 /* ─── Theme variables ─────────────────────────────── */
@@ -202,57 +190,21 @@
 .label {
   width: 105mm;
   height: 48mm;
-  border: 0.3mm solid #999;
+  border: 0.4mm solid #000;
   box-sizing: border-box;
-  padding: 1.5mm;
-  font-family: Arial, sans-serif;
+  padding: 1.5mm 2mm;
+  font-family: 'Arial Black', Arial, sans-serif;
   font-size: 7pt;
+  color: #000;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-}
-
-.label-row {
-  display: flex;
-  width: 100%;
-  border-bottom: 0.2mm solid #ccc;
-  padding-bottom: 0.5mm;
-  margin-bottom: 0.5mm;
-}
-
-.label-row:last-child {
-  border-bottom: none;
-}
-
-.label-brand {
-  font-size: 9pt;
-  font-weight: bold;
-  flex: 1;
-}
-
-.label-product {
-  font-size: 8.5pt;
-  font-weight: bold;
-  text-align: center;
-  padding: 1mm 0;
-}
-
-.label-field {
-  flex: 1;
-  font-size: 7pt;
-}
-
-.label-field-value {
-  font-weight: bold;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 .label-empty {
-  color: #999;
+  color: #bbb;
   letter-spacing: 1px;
-}
-
-.label-manufacturer {
-  font-size: 6.5pt;
-  color: #444;
 }
