@@ -79,7 +79,7 @@ export default function Dashboard() {
     setLabels(initialLabels());
     setCurrentTemplateName('');
     localStorage.removeItem(DRAFT_KEY);
-    toast('Labels cleared', { icon: '🗑️' });
+    toast('Labels cleared');
   };
 
   const filledCount = labels.filter(l => l.product?.trim()).length;
@@ -101,7 +101,11 @@ export default function Dashboard() {
               width: 36, height: 36, borderRadius: '50%',
               background: 'rgba(255,255,255,0.15)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
-            }}>🪔</div>
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg>
+            </div>
             <div>
               <div style={{ fontWeight: 700, fontSize: 15, lineHeight: 1.2 }}>Shree Ganpati Agency</div>
               <div style={{ fontSize: 10, opacity: 0.75, letterSpacing: '0.1em' }}>LABEL PRINT SYSTEM v2</div>
@@ -112,7 +116,8 @@ export default function Dashboard() {
                 background: 'rgba(255,255,255,0.15)', borderRadius: 20,
                 fontSize: 11, fontWeight: 600,
               }}>
-                📄 {currentTemplateName}
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                {currentTemplateName}
               </div>
             )}
           </div>
@@ -124,7 +129,8 @@ export default function Dashboard() {
               fontSize: 11, opacity: autoSaved ? 1 : 0, transition: 'opacity 0.3s',
               color: '#fde68a', display: 'flex', alignItems: 'center', gap: 4,
             }}>
-              ✓ Draft saved
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fde68a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              Draft saved
             </div>
             {/* Label count badge */}
             <div style={{
@@ -142,7 +148,8 @@ export default function Dashboard() {
               onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.25)'}
               onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
             >
-              💾 Save <span style={{ opacity: 0.6, fontSize: 10 }}>Ctrl+S</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Save <span style={{ opacity: 0.6, fontSize: 10 }}>Ctrl+S</span>
             </button>
             <button onClick={openLoad} style={{
               background: 'rgba(255,255,255,0.15)', border: 'none', color: 'white',
@@ -152,7 +159,8 @@ export default function Dashboard() {
               onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.25)'}
               onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
             >
-              📂 Load
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              Load
             </button>
             <button onClick={handleReset} style={{
               background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.4)', color: '#fca5a5',
@@ -161,14 +169,16 @@ export default function Dashboard() {
               onMouseOver={e => e.currentTarget.style.background = 'rgba(239,68,68,0.35)'}
               onMouseOut={e => e.currentTarget.style.background = 'rgba(239,68,68,0.2)'}
             >
-              🗑 Reset
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              Reset
             </button>
             <div style={{ width: 1, height: 28, background: 'rgba(255,255,255,0.2)' }} />
             <button onClick={() => { logout(); toast('Logged out'); navigate('/'); }} style={{
               background: 'rgba(255,255,255,0.1)', border: 'none', color: 'rgba(255,255,255,0.7)',
               borderRadius: 8, padding: '7px 12px', fontSize: 12, cursor: 'pointer',
             }}>
-              ⏏ Logout
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Logout
             </button>
           </div>
         </div>
