@@ -6,6 +6,8 @@
   .print-sheet, .print-sheet * { visibility: visible; }
   .print-sheet { position: fixed; top: 0; left: 0; }
   .no-print { display: none !important; }
+  .print-copies-container { display: block !important; }
+  .print-copies-container .print-sheet { position: static; }
   @page { size: A4; margin: 0; }
 }
 

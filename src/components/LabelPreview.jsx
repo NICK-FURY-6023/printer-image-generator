@@ -5,7 +5,47 @@ import LabelSheet from './LabelSheet';
 const A4_W = 794;
 const A4_H = 1123;
 
-export default function LabelPreview({ labels, onSave, onLoad }) {
+function Icon({ d, size = 14, sw = 1.75 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round"
+      style={{ display: 'block', flexShrink: 0 }}>
+      <path d={d} />
+    </svg>
+  );
+}
+
+function ToolBtn({ onClick, disabled, title, children, variant = 'ghost', style: extra = {} }) {
+  const variants = {
+    ghost:   { background: 'rgba(255,255,255,0.06)', color: '#cbd5e1', border: '1px solid #334155' },
+    saffron: { background: 'linear-gradient(135deg,#ea580c,#c2410c)', color: 'white', border: 'none' },
+    blue:    { background: 'linear-gradient(135deg,#2563eb,#1d4ed8)', color: 'white', border: 'none' },
+    green:   { background: 'rgba(34,197,94,0.1)', color: '#86efac', border: '1px solid rgba(34,197,94,0.2)' },
+  };
+  return (
+    <button
+      onClick={!disabled ? onClick : undefined}
+      title={title}
+      style={{
+        borderRadius: 8, fontWeight: 600, fontSize: 12, padding: '7px 13px',
+        cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.5 : 1,
+        display: 'inline-flex', alignItems: 'center', gap: 6, transition: 'all 0.15s',
+        ...variants[variant], ...extra,
+      }}
+      onMouseOver={e => { if (!disabled) e.currentTarget.style.opacity = '0.85'; }}
+      onMouseOut={e  => { if (!disabled) e.currentTarget.style.opacity = '1'; }}
+    >
+      {children}
+    </button>
+  );
+}
+
+export default function LabelPreview({
+  labels,
+  onSave, onLoad, onPrint,
+  copies = 1, onCopiesChange,
+  fontScale = 1, onFontScaleChange,
+}) {
   const containerRef = useRef(null);
   const [scale, setScale] = useState(0.6);
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -15,43 +55,38 @@ export default function LabelPreview({ labels, onSave, onLoad }) {
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const observer = new ResizeObserver(() => {
+    const obs = new ResizeObserver(() => {
       const w = el.clientWidth - 48;
-      const h = el.clientHeight - 180;
+      const h = el.clientHeight - 200;
       setScale(Math.min(w / A4_W, h / A4_H, 1));
     });
-    observer.observe(el);
-    return () => observer.disconnect();
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    if (onPrint) onPrint();
+    else window.print();
+  };
 
   const handleDownloadPDF = async () => {
     setPdfLoading(true);
     const tid = toast.loading('Generating PDF…');
     try {
-      const { default: jsPDF } = await import('jspdf');
+      const { default: jsPDF }       = await import('jspdf');
       const { default: html2canvas } = await import('html2canvas');
       const sheet = document.querySelector('.print-sheet');
       if (!sheet) throw new Error('Sheet not found');
-
       const canvas = await html2canvas(sheet, {
-        scale: 4,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        width: A4_W,
-        height: A4_H,
-        windowWidth: A4_W,
-        windowHeight: A4_H,
+        scale: 4, useCORS: true, backgroundColor: '#ffffff',
+        width: A4_W, height: A4_H, windowWidth: A4_W, windowHeight: A4_H,
       });
-
       const pdf = new jsPDF({ format: 'a4', unit: 'mm', orientation: 'portrait' });
-      const imgData = canvas.toDataURL('image/png', 1.0);
-      pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+      pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', 0, 0, 210, 297);
       pdf.save('ganpati-labels.pdf');
       toast.success('PDF downloaded!', { id: tid });
     } catch {
-      toast.error('PDF failed. Try Print → Save as PDF instead.', { id: tid });
+      toast.error('PDF failed. Use Print → Save as PDF instead.', { id: tid });
     } finally {
       setPdfLoading(false);
     }
@@ -60,99 +95,140 @@ export default function LabelPreview({ labels, onSave, onLoad }) {
   const filledCount = labels.filter(l => l.product?.trim()).length;
 
   return (
-    <div
-      ref={containerRef}
-      style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '16px', gap: 12 }}
-    >
-      {/* Toolbar */}
+    <div ref={containerRef} style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: 16, gap: 12 }}>
+
+      {/* ── Toolbar ─────────────────────────────────────────────────────── */}
       <div style={{
-        background: '#1e293b', borderRadius: 12, padding: '12px 16px',
+        background: '#1e293b', borderRadius: 12, padding: '10px 14px',
         border: '1px solid #334155', display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center',
         flexShrink: 0,
       }}>
-        <button onClick={handlePrint} className="btn-saffron" title="Ctrl+P">
-          🖨️ Print <span style={{ opacity: 0.6, fontSize: 10 }}>Ctrl+P</span>
-        </button>
-        <button
-          onClick={handleDownloadPDF}
-          disabled={pdfLoading}
-          style={{
-            background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', color: 'white',
-            borderRadius: 8, fontWeight: 600, fontSize: 13, padding: '8px 16px',
-            border: 'none', cursor: pdfLoading ? 'wait' : 'pointer',
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            opacity: pdfLoading ? 0.7 : 1, transition: 'opacity 0.15s',
-          }}
-        >
-          {pdfLoading ? <span className="animate-spin-slow">⏳</span> : '⬇️'} PDF
-        </button>
-        <button onClick={onSave} className="btn-ghost">💾 Save</button>
-        <button onClick={onLoad} className="btn-ghost">📂 Load</button>
-        <button
+        {/* Print copies input */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <ToolBtn onClick={handlePrint} variant="saffron" title="Ctrl+P">
+            <Icon d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+            <Icon d="M6 14h12v8H6z" />
+            Print
+            <span style={{ fontSize: 10, opacity: 0.6 }}>Ctrl+P</span>
+          </ToolBtn>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: '#0f172a', borderRadius: 8, padding: '4px 8px', border: '1px solid #334155' }}>
+            <span style={{ fontSize: 10, color: '#64748b', whiteSpace: 'nowrap' }}>Copies</span>
+            <button
+              onClick={() => onCopiesChange && onCopiesChange(Math.max(1, copies - 1))}
+              style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '0 2px', fontSize: 14, lineHeight: 1 }}>−</button>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#f97316', minWidth: 16, textAlign: 'center' }}>{copies}</span>
+            <button
+              onClick={() => onCopiesChange && onCopiesChange(Math.min(10, copies + 1))}
+              style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '0 2px', fontSize: 14, lineHeight: 1 }}>+</button>
+          </div>
+        </div>
+
+        {/* PDF */}
+        <ToolBtn onClick={handleDownloadPDF} disabled={pdfLoading} variant="blue">
+          {pdfLoading
+            ? <span style={{ width: 14, height: 14, border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} />
+            : <Icon d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-4-4 4m0 0-4-4m4 4V4" />
+          }
+          PDF
+        </ToolBtn>
+
+        {/* Save / Load */}
+        <ToolBtn onClick={onSave} variant="ghost">
+          <Icon d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+          Save
+        </ToolBtn>
+        <ToolBtn onClick={onLoad} variant="ghost">
+          <Icon d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+          Load
+        </ToolBtn>
+
+        {/* Calibrate toggle */}
+        <ToolBtn
           onClick={() => setShowCalibration(o => !o)}
-          className="btn-ghost"
+          variant={showCalibration ? 'green' : 'ghost'}
           style={{ marginLeft: 'auto' }}
         >
-          📏 Calibrate
-        </button>
-        <div style={{
-          padding: '4px 10px', borderRadius: 20,
-          background: '#0f172a', border: '1px solid #334155', fontSize: 11, color: '#64748b',
-        }}>
-          {filledCount}/12 · <span style={{ color: '#f97316' }}>{Math.round(scale * 100)}%</span>
+          <Icon d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+          Calibrate
+        </ToolBtn>
+
+        {/* Stats */}
+        <div style={{ padding: '4px 10px', borderRadius: 20, background: '#0f172a', border: '1px solid #334155', fontSize: 11, color: '#64748b', whiteSpace: 'nowrap' }}>
+          {filledCount}/12 &middot; <span style={{ color: '#f97316' }}>{Math.round(scale * 100)}%</span>
         </div>
       </div>
 
-      {/* Calibration panel */}
+      {/* ── Calibration Panel ──────────────────────────────────────────── */}
       {showCalibration && (
-        <div className="animate-fade-in" style={{
+        <div style={{
           background: '#1e293b', border: '1px solid #334155',
           borderRadius: 12, padding: '14px 16px', flexShrink: 0,
+          display: 'flex', flexDirection: 'column', gap: 12,
         }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.08em', marginBottom: 12 }}>
-            📏 PRINT CALIBRATION
+          <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.1em' }}>
+            PRINT CALIBRATION
           </div>
+
+          {/* Top margin */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label style={{ fontSize: 12, color: '#64748b', minWidth: 110 }}>Top margin offset</label>
-            <input
-              type="range" min="-5" max="5" step="0.5"
-              value={printMargin}
-              onChange={e => setPrintMargin(Number(e.target.value))}
-              style={{ flex: 1, accentColor: '#f97316' }}
-            />
-            <span style={{ fontSize: 12, color: '#f97316', minWidth: 40, textAlign: 'right' }}>
+            <label style={{ fontSize: 12, color: '#64748b', minWidth: 130 }}>Top margin offset</label>
+            <input type="range" min="-5" max="5" step="0.5"
+              value={printMargin} onChange={e => setPrintMargin(Number(e.target.value))}
+              style={{ flex: 1, accentColor: '#f97316' }} />
+            <span style={{ fontSize: 12, color: '#f97316', minWidth: 44, textAlign: 'right' }}>
               {printMargin > 0 ? '+' : ''}{printMargin}mm
             </span>
-            <button onClick={() => setPrintMargin(0)} className="btn-ghost" style={{ fontSize: 11, padding: '4px 10px' }}>
-              Reset
-            </button>
+            <ToolBtn onClick={() => setPrintMargin(0)} variant="ghost" style={{ fontSize: 10, padding: '4px 8px' }}>Reset</ToolBtn>
           </div>
-          <p style={{ fontSize: 11, color: '#475569', marginTop: 8 }}>
-            If printed labels are shifted up/down, adjust this and reprint.
+
+          {/* Font scale */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <label style={{ fontSize: 12, color: '#64748b', minWidth: 130 }}>Font size scale</label>
+            <input type="range" min="0.8" max="1.3" step="0.05"
+              value={fontScale} onChange={e => onFontScaleChange && onFontScaleChange(Number(e.target.value))}
+              style={{ flex: 1, accentColor: '#7c3aed' }} />
+            <span style={{ fontSize: 12, color: '#7c3aed', minWidth: 44, textAlign: 'right' }}>
+              {Math.round(fontScale * 100)}%
+            </span>
+            <ToolBtn onClick={() => onFontScaleChange && onFontScaleChange(1)} variant="ghost" style={{ fontSize: 10, padding: '4px 8px' }}>Reset</ToolBtn>
+          </div>
+
+          <p style={{ fontSize: 11, color: '#475569', margin: 0 }}>
+            Adjust margin if labels print shifted up/down. Font scale resizes all label text.
           </p>
         </div>
       )}
 
-      {/* Status bar */}
+      {/* ── Status bar ─────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, padding: '0 4px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px #22c55e' }} />
-          <span style={{ fontSize: 11, color: '#475569' }}>Live A4 Preview · 210 × 297mm · 12 labels</span>
+          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 5px #22c55e' }} />
+          <span style={{ fontSize: 11, color: '#475569' }}>Live A4 Preview &middot; 210×297mm &middot; 12 labels</span>
         </div>
-        <span style={{ fontSize: 11, color: '#334155' }}>Print scale: 100%</span>
+        {copies > 1 && (
+          <span style={{ fontSize: 11, color: '#f97316', fontWeight: 600 }}>{copies} copies on print</span>
+        )}
       </div>
 
-      {/* Scaled sheet */}
+      {/* ── Scaled preview ─────────────────────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingBottom: 16, overflow: 'hidden' }}>
         <div style={{
-          width: A4_W * scale, height: A4_H * scale, flexShrink: 0,
-          borderRadius: 4, overflow: 'hidden',
+          width: A4_W * scale, height: A4_H * scale, flexShrink: 0, borderRadius: 4, overflow: 'hidden',
           boxShadow: '0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)',
         }}>
           <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: A4_W, height: A4_H }}>
-            <LabelSheet labels={labels} extraTopMargin={printMargin} />
+            <LabelSheet labels={labels} extraTopMargin={printMargin} fontScale={fontScale} />
           </div>
         </div>
+      </div>
+
+      {/* ── Hidden print copies (print-only) ───────────────────────────── */}
+      <div className="print-copies-container" style={{ display: 'none' }}>
+        {Array.from({ length: Math.max(0, copies - 1) }, (_, i) => (
+          <div key={i} className="print-sheet" style={{ pageBreakBefore: 'always' }}>
+            <LabelSheet labels={labels} extraTopMargin={printMargin} fontScale={fontScale} />
+          </div>
+        ))}
       </div>
     </div>
   );
