@@ -11,53 +11,18 @@
   @page { size: A4; margin: 0; }
 }
 
-/* ─── Label / Sheet styles (high specificity to override Tailwind resets) ── */
-@layer components {
-  .sheet {
-    width: 210mm;
-    height: 297mm;
-    display: grid;
-    grid-template-columns: repeat(2, 105mm);
-    grid-template-rows: repeat(6, 48mm);
-    padding-top: 4.5mm;
-    padding-bottom: 4.5mm;
-    background: white;
-    box-sizing: border-box;
-  }
-
-  .label {
-    width: 105mm;
-    height: 48mm;
-    border: 0.4mm solid #000;
-    box-sizing: border-box;
-    padding: 1.5mm 2mm;
-    font-family: 'Arial Black', Arial, sans-serif;
-    font-size: 7pt;
-    color: #000;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .label table {
-    border-collapse: collapse;
-  }
-
-  .label th, .label td {
-    border: 0.3mm solid #000;
-    padding: 0.3mm 1.5mm;
-    color: #000;
-    font-weight: 800;
-  }
-
-  .label th {
-    font-weight: 900;
-  }
-
-  .label-empty { color: #bbb; letter-spacing: 1px; }
+/* ─── Sheet grid — OUTSIDE @layer so it can't be overridden ── */
+.sheet {
+  width: 210mm !important;
+  height: 297mm !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, 105mm) !important;
+  grid-template-rows: repeat(6, 48mm) !important;
+  padding: 4.5mm 0 !important;
+  margin: 0 !important;
+  background: white !important;
+  box-sizing: border-box !important;
+  gap: 0 !important;
 }
 
 /* ─── Theme variables ─────────────────────────────── */
