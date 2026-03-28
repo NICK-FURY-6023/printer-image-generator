@@ -18,7 +18,7 @@
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
   grid-template-rows: repeat(6, 1fr) !important;
-  padding: 3.75mm 0 !important;
+  padding: 1mm 0.5mm !important;
   margin: 0 !important;
   background: white !important;
   box-sizing: border-box !important;

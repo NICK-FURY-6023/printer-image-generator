@@ -88,8 +88,8 @@ const SPECS = [
   { label: 'Page Size', value: 'A4 — 210x297mm' },
   { label: 'Grid Layout', value: '2 columns x 6 rows' },
   { label: 'Label Size', value: '105x48mm each' },
-  { label: 'Top Margin', value: '4.5mm' },
-  { label: 'Bottom Margin', value: '4.5mm' },
+  { label: 'Top/Bottom Margin', value: '1mm' },
+  { label: 'Side Margin', value: '0.5mm' },
   { label: 'Total Labels', value: '12 per sheet' },
 ];
 
