@@ -2,189 +2,209 @@ import { QRCodeSVG } from 'qrcode.react';
 
 /*
  * Jaquar-style product label — 105mm × 48mm
- * Layout (top→bottom):
- *   ┌─────────────────────────────────────────────────┐
- *   │  [QR] BRAND        │ Size │ Qty │ MRP(Per Piece)│
- *   │       Code#         │ ---- │ 1N  │ ₹3800.00     │
- *   ├─────────────────────┴──────┴─────┴──────────────┤
- *   │  PRODUCT DESCRIPTION TEXT IN BOLD UPPERCASE      │
- *   │  MULTI-LINE IF NEEDED                            │
- *   ├──────────────────────────────────────────────────┤
- *   │  Mfg By: CODE           Mth/Yr of Mfg: ----    │
- *   │  MANUFACTURER NAME                    MADE IN X │
- *   └──────────────────────────────────────────────────┘
+ * ┌──────┬──────────────────────────────────────────────────────┐
+ * │      │ [JJ] Jaquar        │ Size │ Qty │ ₹ 3800.00        │
+ * │  V   │                    │------│-----│ Incl.Of All Taxes │
+ * │  E   │                    │      │     │ 314786342         │
+ * │  R   ├────────────────────┴──────┴─────┴──────────────────┤
+ * │  T   │ CONCEALED BODY FOR SINGLE LEVER HIGH FLOW   [QR]  │
+ * │  I   │ DIVERTER WITH BUTTON ASSEMBLY, BUT WITHOUT         │
+ * │  C   │ EXPOSED PARTS                                      │
+ * │  A   ├────────────────────────────────────────────────────┤
+ * │  L   │ Manufactured By: 1QAC1G3    Mth/Yr of Mfg: 2025  │
+ * │      ├────────────────────────────────────────────────────┤
+ * │  C   │ JAQUAR & CO. PVT. LTD.            MADE IN INDIA   │
+ * │  O   │ REGD. OFFICE: ... MFG AT: ...                     │
+ * │  D   ├────────────────────────────────────────────────────┤
+ * │  E   │ For Complaints... Email: ... Phone: ...            │
+ * └──────┴────────────────────────────────────────────────────┘
  */
 
 function LabelCell({ label, fontScale = 1 }) {
   const brand = label.manufacturer?.trim() || '';
-  const brandDisplay = brand ? brand.toUpperCase().split(/\s+/).slice(0, 3).join(' ') : '';
-  const qrVal = (label.code?.trim() || label.product?.trim() || 'N/A').substring(0, 100);
-  const s = (pt) => (pt * fontScale) + 'pt';
+  const code = label.code?.trim() || '';
+  const qrVal = (code || label.product?.trim() || 'N/A').substring(0, 100);
+  const s = (pt) => `${pt * fontScale}pt`;
   const B = '0.2mm solid #222';
 
-  // Outer label box — all in inline styles to bypass Tailwind resets
   return (
     <div style={{
       width: '105mm', height: '48mm',
-      border: B,
-      boxSizing: 'border-box',
-      padding: '1mm 1.2mm',
+      border: B, boxSizing: 'border-box',
       fontFamily: 'Arial, Helvetica, sans-serif',
-      color: '#000',
-      display: 'flex', flexDirection: 'column',
-      overflow: 'hidden',
-      WebkitPrintColorAdjust: 'exact',
-      printColorAdjust: 'exact',
-      position: 'relative',
+      color: '#000', display: 'flex', overflow: 'hidden',
+      WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact',
     }}>
 
-      {/* ── ROW 1: Brand+QR left | Size/Qty/MRP table right ── */}
+      {/* ── LEFT VERTICAL STRIP — model code rotated ── */}
       <div style={{
-        display: 'flex', alignItems: 'stretch',
-        borderBottom: B,
-        paddingBottom: '0.8mm', marginBottom: '0.6mm',
-        minHeight: '11.5mm', maxHeight: '13mm',
-        flexShrink: 0,
+        width: '5.5mm', borderRight: B,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0, overflow: 'hidden',
       }}>
-        {/* Left side: QR + Brand + Code */}
+        {code && (
+          <div style={{
+            transform: 'rotate(-90deg)', whiteSpace: 'nowrap',
+            fontSize: s(6), fontWeight: 900, letterSpacing: '0.3px',
+          }}>{code}</div>
+        )}
+      </div>
+
+      {/* ── MAIN CONTENT AREA ── */}
+      <div style={{
+        flex: '1 1 auto', display: 'flex', flexDirection: 'column',
+        overflow: 'hidden', minWidth: 0,
+      }}>
+
+        {/* ROW 1 — Brand | Size/Qty table | Price + Serial */}
         <div style={{
-          display: 'flex', gap: '1.2mm', alignItems: 'flex-start',
-          flex: '1 1 auto', minWidth: 0, overflow: 'hidden',
+          display: 'flex', alignItems: 'stretch',
+          borderBottom: B, flexShrink: 0,
         }}>
-          <div style={{ flexShrink: 0, width: '10mm', height: '10mm' }}>
-            <QRCodeSVG
-              value={qrVal}
-              size={38}
-              style={{ width: '10mm', height: '10mm', display: 'block' }}
-            />
+          {/* Brand name */}
+          <div style={{
+            flex: '1 1 auto', display: 'flex', alignItems: 'center',
+            padding: '0.5mm 1.5mm', minWidth: 0, overflow: 'hidden',
+          }}>
+            <span style={{
+              fontSize: s(11), fontWeight: 700, fontStyle: 'italic',
+              fontFamily: 'Georgia, "Times New Roman", serif',
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              lineHeight: 1.1,
+            }}>
+              {brand || <span style={{ color: '#ccc', fontStyle: 'normal', fontWeight: 400, fontSize: s(8) }}>Brand</span>}
+            </span>
           </div>
-          <div style={{ minWidth: 0, overflow: 'hidden', paddingTop: '0.2mm', maxWidth: '100%' }}>
-            {brandDisplay ? (
-              <div style={{
-                fontSize: s(8.5), fontWeight: 900, color: '#000',
-                lineHeight: 1.1, whiteSpace: 'nowrap',
-                overflow: 'hidden', textOverflow: 'ellipsis',
-                maxWidth: '100%',
-              }}>{brandDisplay}</div>
-            ) : (
-              <div style={{ fontSize: s(7), color: '#bbb' }}>BRAND</div>
+
+          {/* Size + Qty mini-table */}
+          <table style={{ borderCollapse: 'collapse', flexShrink: 0 }}>
+            <thead>
+              <tr>
+                {['Size', 'Qty'].map(h => (
+                  <th key={h} style={{
+                    border: B, padding: '0.2mm 1.2mm',
+                    fontSize: s(5), fontWeight: 900, textAlign: 'center',
+                    whiteSpace: 'nowrap', lineHeight: 1.1,
+                  }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{
+                  border: B, padding: '0.2mm 1.2mm',
+                  fontSize: s(5.5), fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap',
+                }}>{label.size?.trim() || '----'}</td>
+                <td style={{
+                  border: B, padding: '0.2mm 1.2mm',
+                  fontSize: s(5.5), fontWeight: 800, textAlign: 'center', whiteSpace: 'nowrap',
+                }}>{label.qty?.trim() || '----'}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Price + Serial column */}
+          <div style={{
+            borderLeft: B, display: 'flex', flexDirection: 'column',
+            alignItems: 'flex-end', justifyContent: 'center',
+            padding: '0.5mm 1.5mm', flexShrink: 0, minWidth: '20mm',
+          }}>
+            <div style={{ fontSize: s(8.5), fontWeight: 900, lineHeight: 1, whiteSpace: 'nowrap' }}>
+              {label.price?.trim() ? `\u20B9 ${label.price}` : '----'}
+            </div>
+            {label.price?.trim() && (
+              <div style={{ fontSize: s(3.2), color: '#333', whiteSpace: 'nowrap', lineHeight: 1, marginTop: '0.2mm' }}>
+                Incl. Of All Taxes
+              </div>
             )}
-            {label.code?.trim() && (
-              <div style={{
-                fontSize: s(6.5), fontWeight: 800, color: '#000',
-                marginTop: '0.4mm',
-                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-              }}>{label.code}</div>
+            {label.serialNo?.trim() && (
+              <div style={{ fontSize: s(5), fontWeight: 800, lineHeight: 1, marginTop: '0.3mm' }}>
+                {label.serialNo}
+              </div>
             )}
           </div>
         </div>
 
-        {/* Right side: Size/Qty/MRP table */}
-        <table style={{
-          borderCollapse: 'collapse', flexShrink: 0,
-          marginLeft: '0.8mm', alignSelf: 'flex-start',
+        {/* ROW 2 — Product description + QR code */}
+        <div style={{
+          flex: '1 1 auto', display: 'flex', alignItems: 'flex-start',
+          padding: '0.5mm 1.5mm', borderBottom: B,
+          overflow: 'hidden', minHeight: 0,
         }}>
-          <thead>
-            <tr>
-              {['Size', 'Qty'].map(h => (
-                <th key={h} style={{
-                  border: B,
-                  padding: '0.3mm 1.5mm',
-                  fontSize: s(6), fontWeight: 900, color: '#000',
-                  textAlign: 'center', whiteSpace: 'nowrap',
-                  lineHeight: 1.15,
-                }}>{h}</th>
-              ))}
-              <th style={{
-                border: B,
-                padding: '0.3mm 1.5mm',
-                fontSize: s(5), fontWeight: 900, color: '#000',
-                textAlign: 'center', whiteSpace: 'nowrap',
-                lineHeight: 1.15,
-              }}>MRP (Per Piece)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style={{
-                border: B, padding: '0.2mm 1.5mm',
-                fontSize: s(6.5), fontWeight: 800, color: '#000', textAlign: 'center',
-                whiteSpace: 'nowrap',
-              }}>{label.size?.trim() || '----'}</td>
-              <td style={{
-                border: B, padding: '0.2mm 1.5mm',
-                fontSize: s(6.5), fontWeight: 800, color: '#000', textAlign: 'center',
-                whiteSpace: 'nowrap',
-              }}>{label.qty?.trim() || '----'}</td>
-              <td style={{
-                border: B, padding: '0.2mm 1.5mm',
-                textAlign: 'center', verticalAlign: 'middle',
-              }}>
-                <div style={{ fontSize: s(8.5), fontWeight: 900, color: '#000', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
-                  {label.price?.trim() ? `₹${label.price}` : '----'}
-                </div>
-                {label.price?.trim() && (
-                  <div style={{ fontSize: s(4), color: '#333', lineHeight: 1, marginTop: '0.1mm', whiteSpace: 'nowrap' }}>
-                    (Incl. Of All Taxes)
-                  </div>
-                )}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* ── ROW 2: Product description — fills remaining space ── */}
-      <div style={{
-        flex: '1 1 auto',
-        display: 'flex', alignItems: 'flex-start',
-        overflow: 'hidden',
-        padding: '0.4mm 0',
-        minHeight: 0,
-      }}>
-        {label.product?.trim() ? (
-          <div style={{
-            fontSize: s(8), fontWeight: 900, color: '#000',
-            lineHeight: 1.25, textTransform: 'uppercase',
-            wordBreak: 'break-word',
-            overflow: 'hidden',
-            display: '-webkit-box',
-            WebkitLineClamp: 4,
-            WebkitBoxOrient: 'vertical',
-            width: '100%',
-          }}>{label.product}</div>
-        ) : (
-          <div style={{ fontSize: s(7), color: '#ccc' }}>PRODUCT DESCRIPTION</div>
-        )}
-      </div>
-
-      {/* ── ROW 3: Manufacturer bottom bar ── */}
-      <div style={{
-        borderTop: B,
-        paddingTop: '0.6mm',
-        flexShrink: 0,
-        overflow: 'hidden',
-      }}>
-        {/* Manufactured By row */}
-        {label.code?.trim() && (
-          <div style={{
-            display: 'flex', gap: '1.5mm', marginBottom: '0.3mm',
-            fontSize: s(5), color: '#222', lineHeight: 1.15,
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-          }}>
-            <span><b style={{ fontWeight: 800 }}>Manufactured By:</b> {label.code}</span>
+          <div style={{ flex: '1 1 auto', minWidth: 0 }}>
+            {label.product?.trim() ? (
+              <div style={{
+                fontSize: s(6.5), fontWeight: 900, lineHeight: 1.2,
+                textTransform: 'uppercase', wordBreak: 'break-word',
+                overflow: 'hidden', display: '-webkit-box',
+                WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
+              }}>{label.product}</div>
+            ) : (
+              <div style={{ fontSize: s(6), color: '#ccc' }}>PRODUCT DESCRIPTION</div>
+            )}
           </div>
-        )}
-        {/* Company name */}
-        {brand ? (
-          <div style={{
-            fontSize: s(7), fontWeight: 900, color: '#000',
-            lineHeight: 1.1, textTransform: 'uppercase',
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-          }}>{brand}</div>
-        ) : (
-          <div style={{ fontSize: s(6), color: '#ccc' }}>MANUFACTURER</div>
-        )}
+          <div style={{ flexShrink: 0, marginLeft: '1.5mm' }}>
+            <QRCodeSVG value={qrVal} size={30}
+              style={{ width: '8.5mm', height: '8.5mm', display: 'block' }} />
+          </div>
+        </div>
+
+        {/* ROW 3 — Manufactured By + Mfg Date */}
+        <div style={{
+          display: 'flex', justifyContent: 'space-between',
+          padding: '0.3mm 1.5mm', borderBottom: B, flexShrink: 0,
+          fontSize: s(4.5), lineHeight: 1.2,
+        }}>
+          <span>
+            <span style={{ fontWeight: 800 }}>Manufactured By:</span>{' '}
+            <span style={{ fontWeight: 700 }}>{label.mfgCode?.trim() || '----'}</span>
+          </span>
+          <span>
+            <span style={{ fontWeight: 800 }}>Mth/Yr of Mfg:</span>{' '}
+            {label.mfgDate?.trim() || '----'}
+          </span>
+        </div>
+
+        {/* ROW 4 — Company name + MADE IN + Addresses */}
+        <div style={{
+          padding: '0.3mm 1.5mm', borderBottom: B, flexShrink: 0, overflow: 'hidden',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <span style={{
+              fontSize: s(5.5), fontWeight: 900, textTransform: 'uppercase',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              flex: '1 1 auto', minWidth: 0,
+            }}>{brand ? brand.toUpperCase() : 'COMPANY NAME'}</span>
+            <span style={{
+              fontSize: s(4.5), fontWeight: 900, whiteSpace: 'nowrap',
+              flexShrink: 0, marginLeft: '2mm',
+            }}>MADE IN {(label.madeIn?.trim() || 'INDIA').toUpperCase()}</span>
+          </div>
+          {(label.regdAddress?.trim() || label.mfgAddress?.trim()) && (
+            <div style={{
+              fontSize: s(3), color: '#111', lineHeight: 1.15,
+              overflow: 'hidden', display: '-webkit-box',
+              WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+              marginTop: '0.1mm',
+            }}>
+              {label.regdAddress?.trim() && <span>REGD. OFFICE: {label.regdAddress} </span>}
+              {label.mfgAddress?.trim() && <span>MFG. AT: {label.mfgAddress}</span>}
+            </div>
+          )}
+        </div>
+
+        {/* ROW 5 — Complaints / Contact footer */}
+        <div style={{
+          padding: '0.2mm 1.5mm', flexShrink: 0, overflow: 'hidden',
+          fontSize: s(3.2), lineHeight: 1.2, color: '#111',
+        }}>
+          <div>For Complaints Contact : Mgr. Customer Care, at Regd. Off. Address</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>E-mail : {label.email?.trim() || '----'}</span>
+            <span>{'\u260E'} {label.phone?.trim() || '----'}{label.phone?.trim() ? ' (Toll Free)' : ''}</span>
+          </div>
+        </div>
+
       </div>
     </div>
   );
