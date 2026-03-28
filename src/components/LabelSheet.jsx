@@ -26,10 +26,11 @@ function LabelCell({ label, fontScale = 1 }) {
   const qrVal = (code || label.product?.trim() || 'N/A').substring(0, 100);
   const s = (pt) => `${pt * fontScale}pt`;
   const B = '0.2mm solid #222';
+  const logoUrl = label.logoUrl?.trim() || '';
 
   return (
     <div style={{
-      width: '105mm', height: '48mm',
+      width: '100%', height: '100%',
       border: B, boxSizing: 'border-box',
       fontFamily: 'Arial, Helvetica, sans-serif',
       color: '#000', display: 'flex', overflow: 'hidden',
@@ -61,11 +62,17 @@ function LabelCell({ label, fontScale = 1 }) {
           display: 'flex', alignItems: 'stretch',
           borderBottom: B, flexShrink: 0,
         }}>
-          {/* Brand name */}
+          {/* Brand logo + name */}
           <div style={{
             flex: '1 1 auto', display: 'flex', alignItems: 'center',
-            padding: '0.5mm 1.5mm', minWidth: 0, overflow: 'hidden',
+            padding: '0.5mm 1.5mm', minWidth: 0, overflow: 'hidden', gap: '1.2mm',
           }}>
+            {logoUrl && (
+              <img src={logoUrl} alt="" style={{
+                height: '5mm', width: 'auto', maxWidth: '12mm',
+                objectFit: 'contain', flexShrink: 0,
+              }} />
+            )}
             <span style={{
               fontSize: s(11), fontWeight: 700, fontStyle: 'italic',
               fontFamily: 'Georgia, "Times New Roman", serif',
@@ -215,7 +222,7 @@ export default function LabelSheet({ labels, extraTopMargin = 0, fontScale = 1 }
   return (
     <div
       className="sheet print-sheet"
-      style={extraTopMargin !== 0 ? { paddingTop: `${4.5 + extraTopMargin}mm`, paddingBottom: `${4.5 - extraTopMargin}mm` } : undefined}
+      style={extraTopMargin !== 0 ? { paddingTop: `${3.75 + extraTopMargin}mm`, paddingBottom: `${3.75 - extraTopMargin}mm` } : undefined}
     >
       {safeLabels.map((label, i) => (
         <LabelCell key={i} label={label} fontScale={fontScale} />

@@ -13,6 +13,7 @@ const FIELDS = [
   { key: 'madeIn',       label: 'Made In',          placeholder: 'e.g. INDIA',                      span: 1 },
   // Company info
   { key: 'manufacturer', label: 'Brand / Company',  placeholder: 'e.g. Jaquar & Co. Pvt. Ltd.',    span: 2, section: 'Company Info' },
+  { key: 'logoUrl',      label: 'Logo URL',          placeholder: 'Paste image URL (e.g. /jaquar-logo.png)', span: 2 },
   { key: 'regdAddress',  label: 'Regd. Address',    placeholder: 'Registered office address',       span: 2 },
   { key: 'mfgAddress',   label: 'Mfg. Address',     placeholder: 'Manufacturing unit address',      span: 2 },
   { key: 'email',        label: 'Email',             placeholder: 'e.g. service@company.com',       span: 1 },
@@ -22,6 +23,7 @@ const FIELDS = [
 const emptyLabel = () => ({
   product: '', code: '', price: '', size: '', qty: '',
   manufacturer: '', serialNo: '', mfgCode: '', mfgDate: '',
+  madeIn: '', regdAddress: '', mfgAddress: '', email: '', phone: '', logoUrl: '',
   madeIn: '', regdAddress: '', mfgAddress: '', email: '', phone: '',
 });
 const isFilled   = (l) => !!(l.product?.trim() || l.code?.trim() || l.price?.trim());

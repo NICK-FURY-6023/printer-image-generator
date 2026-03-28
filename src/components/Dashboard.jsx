@@ -9,13 +9,13 @@ import TemplateManager from './TemplateManager';
 const emptyLabel = () => ({
   product: '', code: '', price: '', size: '', qty: '',
   manufacturer: '', serialNo: '', mfgCode: '', mfgDate: '',
-  madeIn: '', regdAddress: '', mfgAddress: '', email: '', phone: '',
+  madeIn: '', regdAddress: '', mfgAddress: '', email: '', phone: '', logoUrl: '',
 });
 const initialLabels = () => Array.from({ length: 12 }, emptyLabel);
 const DRAFT_KEY   = 'ganpati_draft';
 const HISTORY_KEY = 'ganpati_history';
 
-const CSV_COLUMNS = ['product', 'code', 'price', 'size', 'qty', 'manufacturer', 'serialNo', 'mfgCode', 'mfgDate', 'madeIn', 'regdAddress', 'mfgAddress', 'email', 'phone'];
+const CSV_COLUMNS = ['product', 'code', 'price', 'size', 'qty', 'manufacturer', 'serialNo', 'mfgCode', 'mfgDate', 'madeIn', 'regdAddress', 'mfgAddress', 'email', 'phone', 'logoUrl'];
 const SAMPLE_CSV = `product,code,price,size,qty,manufacturer,serialNo,mfgCode,mfgDate,madeIn,regdAddress,mfgAddress,email,phone
 Concealed Body Diverter,ALD-CHR-070N,3800.00,3/4 inch,1N,Jaquar & Co. Pvt. Ltd.,314786342,1QAC1G3,Mar 2025,INDIA,"C-01 MIA Extn Jaipur 310028","SP-55 RIICO Dharuhera Haryana",service@jaquar.com,1800-121-4808
 Single Lever Basin Mixer,FLR-CHR-005B,2200.00,1/2 inch,1N,Jaquar & Co. Pvt. Ltd.,314786343,1QAC1G3,Mar 2025,INDIA,"C-01 MIA Extn Jaipur 310028","SP-55 RIICO Dharuhera Haryana",service@jaquar.com,1800-121-4808
