@@ -1,14 +1,30 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 const FIELDS = [
-  { key: 'manufacturer', label: 'Brand Name',      placeholder: 'e.g. Jaquar',                    span: 2 },
-  { key: 'code',         label: 'Product Code',     placeholder: 'e.g. ALD-CHR-070N',              span: 1 },
-  { key: 'price',        label: 'Product Price (₹)', placeholder: 'e.g. 3800.00',                  span: 1 },
-  { key: 'product',      label: 'Product Name',     placeholder: 'e.g. Concealed Body Diverter',   span: 2 },
+  // Product info
+  { key: 'product',      label: 'Product Name',    placeholder: 'e.g. Concealed Body Diverter',    span: 2 },
+  { key: 'code',         label: 'Model Code',      placeholder: 'e.g. ALD-CHR-070N',               span: 1 },
+  { key: 'serialNo',     label: 'Serial No.',       placeholder: 'e.g. 314786342',                  span: 1 },
+  { key: 'price',        label: 'MRP (₹)',          placeholder: 'e.g. 3800.00',                    span: 1 },
+  { key: 'size',         label: 'Size',             placeholder: 'e.g. 3/4 inch',                   span: 1 },
+  { key: 'qty',          label: 'Qty',              placeholder: 'e.g. 1N',                         span: 1 },
+  { key: 'mfgCode',      label: 'Mfg. Code',       placeholder: 'e.g. 1QAC1G3',                    span: 1 },
+  { key: 'mfgDate',      label: 'Mfg. Date',       placeholder: 'e.g. Mar 2025',                    span: 1 },
+  { key: 'madeIn',       label: 'Made In',          placeholder: 'e.g. INDIA',                      span: 1 },
+  // Company info
+  { key: 'manufacturer', label: 'Brand / Company',  placeholder: 'e.g. Jaquar & Co. Pvt. Ltd.',    span: 2, section: 'Company Info' },
+  { key: 'logoUrl',      label: 'Logo URL',          placeholder: 'Paste image URL (e.g. /jaquar-logo.png)', span: 2 },
+  { key: 'regdAddress',  label: 'Regd. Address',    placeholder: 'Registered office address',       span: 2 },
+  { key: 'mfgAddress',   label: 'Mfg. Address',     placeholder: 'Manufacturing unit address',      span: 2 },
+  { key: 'email',        label: 'Email',             placeholder: 'e.g. service@company.com',       span: 1 },
+  { key: 'phone',        label: 'Phone',             placeholder: 'e.g. 1800-121-4808',             span: 1 },
 ];
 
 const emptyLabel = () => ({
-  product: '', code: '', price: '', manufacturer: '',
+  product: '', code: '', price: '', size: '', qty: '',
+  manufacturer: '', serialNo: '', mfgCode: '', mfgDate: '',
+  madeIn: '', regdAddress: '', mfgAddress: '', email: '', phone: '', logoUrl: '',
+  madeIn: '', regdAddress: '', mfgAddress: '', email: '', phone: '',
 });
 const isFilled   = (l) => !!(l.product?.trim() || l.code?.trim() || l.price?.trim());
 
