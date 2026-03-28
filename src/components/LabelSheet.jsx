@@ -24,7 +24,7 @@ function LabelCell({ label, fontScale = 1 }) {
   // Outer label box — all in inline styles to bypass Tailwind resets
   return (
     <div style={{
-      width: '100%', height: '100%',
+      width: '105mm', height: '48mm',
       border: '0.3mm solid #222',
       boxSizing: 'border-box',
       padding: '1.2mm 1.5mm',
