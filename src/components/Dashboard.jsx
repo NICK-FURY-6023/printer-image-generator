@@ -7,27 +7,25 @@ import LabelPreview from './LabelPreview';
 import TemplateManager from './TemplateManager';
 
 const emptyLabel = () => ({
-  product: '', code: '', price: '', size: '', qty: '',
-  manufacturer: '', serialNo: '', mfgCode: '', mfgDate: '',
-  madeIn: '', regdAddress: '', mfgAddress: '', email: '', phone: '',
+  product: '', code: '', price: '', manufacturer: '',
 });
 const initialLabels = () => Array.from({ length: 12 }, emptyLabel);
 const DRAFT_KEY   = 'ganpati_draft';
 const HISTORY_KEY = 'ganpati_history';
 
-const CSV_COLUMNS = ['product', 'code', 'price', 'size', 'qty', 'manufacturer', 'serialNo', 'mfgCode', 'mfgDate', 'madeIn', 'regdAddress', 'mfgAddress', 'email', 'phone'];
-const SAMPLE_CSV = `product,code,price,size,qty,manufacturer,serialNo,mfgCode,mfgDate,madeIn,regdAddress,mfgAddress,email,phone
-Concealed Body Diverter,ALD-CHR-070N,3800.00,3/4 inch,1N,Jaquar & Co. Pvt. Ltd.,314786342,1QAC1G3,Mar 2025,INDIA,"C-01 MIA Extn Jaipur 310028","SP-55 RIICO Dharuhera Haryana",service@jaquar.com,1800-121-4808
-Single Lever Basin Mixer,FLR-CHR-005B,2200.00,1/2 inch,1N,Jaquar & Co. Pvt. Ltd.,314786343,1QAC1G3,Mar 2025,INDIA,"C-01 MIA Extn Jaipur 310028","SP-55 RIICO Dharuhera Haryana",service@jaquar.com,1800-121-4808
-Wall Mixer With Bend,OPL-CHR-015,1800.00,15mm,1N,Cera Sanitaryware Ltd.,227654321,2BRC2D4,Feb 2025,INDIA,"9 EPIP Kasna Greater Noida","Kadi Mehsana Gujarat",care@cera-india.com,1800-209-2427
-Overhead Shower 200mm,SPA-CHR-620,4500.00,200mm,1N,Hindware Ltd.,445566778,3HDW5E6,Jan 2025,INDIA,"Hindware House Noida","Bahadurgarh Haryana",support@hindware.com,1800-102-0202
-Angular Stop Cock,PRY-CHR-035,980.00,1/2 inch,1N,Parryware Industries,998877665,4PRY7F8,Apr 2025,INDIA,"EID Parry House Chennai","Ranipet Tamil Nadu",info@parryware.com,1800-599-1900
-High Flow Diverter,KOH-CHR-450,5600.00,3/4 inch,1N,Kohler Co.,112233445,5KHL9G0,Mar 2025,INDIA,"DLF Centre Sansad Marg Delhi","Jhagadia Gujarat",service@kohler.co.in,1800-103-0202
-Pillar Cock Tall Body,JGR-CHR-110,1450.00,N/A,1N,Jaquar & Co. Pvt. Ltd.,314786344,1QAC1G3,May 2025,INDIA,"C-01 MIA Extn Jaipur 310028","SP-55 RIICO Dharuhera Haryana",service@jaquar.com,1800-121-4808
-Flush Valve 32mm,ESS-CHR-055,650.00,32mm,1N,Essco Bathware,665544332,6ESS1H2,Mar 2025,INDIA,"Okhla Industrial Delhi","Bahadurgarh Haryana",care@hsil.com,1800-102-1400
-Kitchen Sink Mixer,GRH-CHR-820,3200.00,N/A,1N,Grohe India Pvt. Ltd.,889900112,7GRH3I4,Feb 2025,INDIA,"Tower B DLF Cyber City Gurgaon","Alwar Rajasthan",info@grohe.in,1800-102-6969
-Concealed Cistern,GBT-CHR-042,2800.00,N/A,1N,Geberit India Pvt. Ltd.,556677889,8GBT5J6,Apr 2025,INDIA,"JMD Megapolis Gurgaon","Pune Maharashtra",support@geberit.in,1800-572-4255
-Health Faucet Set,JGR-CHR-085,780.00,1/2 inch,1 Set,Jaquar & Co. Pvt. Ltd.,314786345,1QAC1G3,Jun 2025,INDIA,"C-01 MIA Extn Jaipur 310028","SP-55 RIICO Dharuhera Haryana",service@jaquar.com,1800-121-4808
+const CSV_COLUMNS = ['manufacturer', 'code', 'product', 'price'];
+const SAMPLE_CSV = `manufacturer,code,product,price
+Jaquar & Co. Pvt. Ltd.,ALD-CHR-070N,Concealed Body Diverter,3800.00
+Jaquar & Co. Pvt. Ltd.,FLR-CHR-005B,Single Lever Basin Mixer,2200.00
+Cera Sanitaryware Ltd.,OPL-CHR-015,Wall Mixer With Bend,1800.00
+Hindware Ltd.,SPA-CHR-620,Overhead Shower 200mm,4500.00
+Parryware Industries,PRY-CHR-035,Angular Stop Cock,980.00
+Kohler Co.,KOH-CHR-450,High Flow Diverter,5600.00
+Jaquar & Co. Pvt. Ltd.,JGR-CHR-110,Pillar Cock Tall Body,1450.00
+Essco Bathware,ESS-CHR-055,Flush Valve 32mm,650.00
+Grohe India Pvt. Ltd.,GRH-CHR-820,Kitchen Sink Mixer,3200.00
+Geberit India Pvt. Ltd.,GBT-CHR-042,Concealed Cistern,2800.00
+Jaquar & Co. Pvt. Ltd.,JGR-CHR-085,Health Faucet Set,780.00
 Towel Rack 600mm,BAT-CHR-320,1200.00,600mm,1N,Bathline India Pvt. Ltd.,334455667,9BAT7K8,May 2025,INDIA,"Sector 63 Noida","Bhiwadi Rajasthan",hello@bathline.in,1800-200-8899`;
 
 function Btn({ onClick, disabled, children, style = {}, variant = 'ghost' }) {
