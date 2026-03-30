@@ -77,10 +77,29 @@ export default function LabelPreview({
       const { default: html2canvas } = await import('html2canvas');
       const sheet = document.querySelector('.print-sheet');
       if (!sheet) throw new Error('Sheet not found');
-      const canvas = await html2canvas(sheet, {
-        scale: 4, useCORS: true, backgroundColor: '#ffffff',
-        width: A4_W, height: A4_H, windowWidth: A4_W, windowHeight: A4_H,
+
+      // Clone sheet into an off-screen full-size container so the
+      // parent's preview transform (scale) doesn't shrink the capture.
+      const offscreen = document.createElement('div');
+      offscreen.style.cssText =
+        'position:fixed;top:0;left:0;width:210mm;height:297mm;z-index:-9999;overflow:hidden;pointer-events:none;background:#fff;';
+      const clone = sheet.cloneNode(true);
+      clone.style.transform = 'none';
+      offscreen.appendChild(clone);
+      document.body.appendChild(offscreen);
+
+      // Wait a tick for images inside the clone to start loading
+      await new Promise(r => setTimeout(r, 600));
+
+      const canvas = await html2canvas(clone, {
+        scale: 4, useCORS: true, allowTaint: false,
+        backgroundColor: '#ffffff',
+        width: A4_W, height: A4_H,
+        windowWidth: A4_W, windowHeight: A4_H,
       });
+
+      document.body.removeChild(offscreen);
+
       const pdf = new jsPDF({ format: 'a4', unit: 'mm', orientation: 'portrait' });
       pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', 0, 0, 210, 297);
       pdf.save('ganpati-labels.pdf');
@@ -216,7 +235,7 @@ export default function LabelPreview({
           width: A4_W * scale, height: A4_H * scale, flexShrink: 0, borderRadius: 4, overflow: 'hidden',
           boxShadow: '0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)',
         }}>
-          <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: A4_W, height: A4_H }}>
+          <div className="print-scale-wrapper" style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: A4_W, height: A4_H }}>
             <LabelSheet labels={labels} extraTopMargin={printMargin} fontScale={fontScale} />
           </div>
         </div>

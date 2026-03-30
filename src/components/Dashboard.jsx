@@ -15,17 +15,17 @@ const HISTORY_KEY = 'ganpati_history';
 
 const CSV_COLUMNS = ['manufacturer', 'logoUrl', 'code', 'product', 'description', 'price'];
 const SAMPLE_CSV = `manufacturer,logoUrl,code,product,description,price
-Jaquar,https://iconlogovector.com/uploads/images/2025/03/lg-67d9f91338422-Jaquar.webp,ALD-CHR-070N,Concealed Body Diverter,High quality brass concealed body for single lever high flow diverter,3800.00
-Jaquar,https://iconlogovector.com/uploads/images/2025/03/lg-67d9f91338422-Jaquar.webp,FLR-CHR-005B,Single Lever Basin Mixer,Chrome plated single lever basin mixer with hot & cold,2200.00
+Jaquar,/jaquar-logo.png,ALD-CHR-070N,Concealed Body Diverter,High quality brass concealed body for single lever high flow diverter,3800.00
+Jaquar,/jaquar-logo.png,FLR-CHR-005B,Single Lever Basin Mixer,Chrome plated single lever basin mixer with hot & cold,2200.00
 Cera,,OPL-CHR-015,Wall Mixer With Bend,Premium wall mixer with provision for overhead shower,1800.00
 Hindware,,SPA-CHR-620,Overhead Shower 200mm,Round overhead shower with rain spray pattern,4500.00
 Parryware,,PRY-CHR-035,Angular Stop Cock,Brass angular stop cock with ceramic cartridge,980.00
 Kohler,,KOH-CHR-450,High Flow Diverter,High flow concealed diverter with trim,5600.00
-Jaquar,https://iconlogovector.com/uploads/images/2025/03/lg-67d9f91338422-Jaquar.webp,JGR-CHR-110,Pillar Cock Tall Body,Tall body pillar cock for table top basins,1450.00
+Jaquar,/jaquar-logo.png,JGR-CHR-110,Pillar Cock Tall Body,Tall body pillar cock for table top basins,1450.00
 Essco,,ESS-CHR-055,Flush Valve 32mm,32mm flush valve for western toilets,650.00
 Grohe,,GRH-CHR-820,Kitchen Sink Mixer,Single lever kitchen sink mixer with pull-out spray,3200.00
 Geberit,,GBT-CHR-042,Concealed Cistern,Concealed cistern for wall hung toilets,2800.00
-Jaquar,https://iconlogovector.com/uploads/images/2025/03/lg-67d9f91338422-Jaquar.webp,JGR-CHR-085,Health Faucet Set,Complete health faucet set with hose and holder,780.00`;
+Jaquar,/jaquar-logo.png,JGR-CHR-085,Health Faucet Set,Complete health faucet set with hose and holder,780.00`;
 
 function Btn({ onClick, disabled, children, style = {}, variant = 'ghost' }) {
   const base = {

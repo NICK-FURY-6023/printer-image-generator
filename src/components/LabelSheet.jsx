@@ -31,7 +31,7 @@ function LabelCell({ label, fontScale = 1 }) {
   const product = label.product?.trim() || '';
   const description = label.description?.trim() || '';
   const price = label.price?.trim() || '';
-  const logoUrl = label.logoUrl?.trim() || 'https://iconlogovector.com/uploads/images/2025/03/lg-67d9f91338422-Jaquar.webp';
+  const logoUrl = label.logoUrl?.trim() || '/jaquar-logo.png';
   const productUrl = label.productUrl?.trim() || '';
   const qrDataUrl = useQRCode(productUrl);
   const s = (pt) => `${pt * fontScale}pt`;
@@ -54,7 +54,7 @@ function LabelCell({ label, fontScale = 1 }) {
         padding: '1mm', overflow: 'hidden',
       }}>
         {logoUrl ? (
-          <img src={logoUrl} alt={brand} style={{
+          <img src={logoUrl} alt={brand} crossOrigin="anonymous" style={{
             maxWidth: '100%', maxHeight: '100%',
             objectFit: 'contain',
           }} />

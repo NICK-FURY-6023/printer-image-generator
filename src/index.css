@@ -4,7 +4,28 @@
 @media print {
   body * { visibility: hidden; }
   .print-sheet, .print-sheet * { visibility: visible; }
-  .print-sheet { position: fixed; top: 0; left: 0; }
+  .print-sheet {
+    position: fixed; top: 0; left: 0;
+    width: 210mm !important; height: 297mm !important;
+    transform: none !important;
+  }
+  /* Remove the preview scale so print renders full-size */
+  .print-scale-wrapper {
+    transform: none !important;
+    width: 210mm !important;
+    height: 297mm !important;
+  }
+  /* Prevent accidental text-decoration lines on label content */
+  .print-sheet * {
+    text-decoration: none !important;
+  }
+  /* Ensure images print */
+  .print-sheet img {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    display: inline-block !important;
+    visibility: visible !important;
+  }
   .no-print { display: none !important; }
   .print-copies-container { display: block !important; }
   .print-copies-container .print-sheet { position: static; }
