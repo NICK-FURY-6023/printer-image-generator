@@ -24,7 +24,8 @@ export default function TemplateManager({ mode, labels, onLoad, onClose }) {
   const [deletingId, setDeletingId] = useState(null);
   const [isLocal, setIsLocal] = useState(false);
 
-  useEffect(() => { loadTemplates(); }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { loadTemplates(); }, [token]);
 
   // WebSocket: auto-refresh template list when changes happen
   useEffect(() => {

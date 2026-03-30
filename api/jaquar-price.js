@@ -21,25 +21,29 @@ async function fetchPriceFromJaquar(code) {
       'X-Forwarded-For': INDIA_IP,
     },
   });
+  if (!searchResp.ok) return null;
   const searchHtml = await searchResp.text();
 
-  // Find product URL from search results
+  // Find product URL from search results — extract all products first, then match
   const linkPattern = /class="product-title"[^>]*>\s*<a[^>]*href="([^"]*\?Id=\d+)"/g;
   const codePattern = /class="product-sku"[^>]*>([^<]*)/g;
   const namePattern = /class="product-title"[^>]*>\s*<a[^>]*>([^<]*)/g;
+
+  const links = [], codes = [], names = [];
+  let m;
+  while ((m = linkPattern.exec(searchHtml)) !== null) links.push(m[1]);
+  while ((m = codePattern.exec(searchHtml)) !== null) codes.push(m[1]);
+  while ((m = namePattern.exec(searchHtml)) !== null) names.push(m[1]);
 
   let productUrl = null;
   let productName = null;
   const upperCode = code.toUpperCase().replace(/[-\s]/g, '');
 
-  let linkMatch, codeMatch, nameMatch;
-  while ((linkMatch = linkPattern.exec(searchHtml)) !== null) {
-    codeMatch = codePattern.exec(searchHtml);
-    nameMatch = namePattern.exec(searchHtml);
-    const foundCode = codeMatch ? codeMatch[1].trim().toUpperCase().replace(/[-\s]/g, '') : '';
+  for (let i = 0; i < links.length; i++) {
+    const foundCode = codes[i] ? codes[i].trim().toUpperCase().replace(/[-\s]/g, '') : '';
     if (foundCode === upperCode || foundCode.includes(upperCode)) {
-      productUrl = linkMatch[1];
-      productName = nameMatch ? nameMatch[1].trim() : '';
+      productUrl = links[i];
+      productName = names[i] ? names[i].trim() : '';
       break;
     }
   }
@@ -66,6 +70,7 @@ async function fetchPriceFromJaquar(code) {
       'X-Forwarded-For': INDIA_IP,
     },
   });
+  if (!prodResp.ok) return { productName, productUrl: fullUrl, price: null, priceRaw: null };
   const prodHtml = await prodResp.text();
 
   // Extract MRP from price-value span: content="4400.00"
@@ -93,7 +98,7 @@ module.exports = async (req, res) => {
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET only' });
 
   const code = (req.query.code || '').trim();
-  if (!code || code.length < 3) return res.json({ price: null, error: 'code param required (min 3 chars)' });
+  if (!code || code.length < 3) return res.status(400).json({ price: null, error: 'code param required (min 3 chars)' });
 
   try {
     const result = await fetchPriceFromJaquar(code);

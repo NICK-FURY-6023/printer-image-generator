@@ -45,6 +45,7 @@ async function fetchSearch(query) {
       'X-Forwarded-For': '103.21.125.1',
     },
   });
+  if (!resp.ok) throw new Error(`Upstream returned HTTP ${resp.status}`);
   return await resp.text();
 }
 

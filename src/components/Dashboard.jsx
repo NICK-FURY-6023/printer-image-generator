@@ -1142,8 +1142,9 @@ export default function Dashboard() {
       )}
       {showCSVImport && <CSVImportModal onImport={handleCSVImport} onClose={() => setShowCSVImport(false)} />}
       {showHistory && <HistoryModal onClose={() => setShowHistory(false)} onRestore={(restoredPages, n) => {
+        if (!Array.isArray(restoredPages) || !restoredPages.length) { toast.error('Invalid history data'); return; }
         const loadedPages = restoredPages.map(page =>
-          Array.from({ length: 12 }, (_, i) => ({ ...emptyLabel(), ...(page[i] || {}) }))
+          Array.from({ length: 12 }, (_, i) => ({ ...emptyLabel(), ...((Array.isArray(page) ? page[i] : null) || {}) }))
         );
         setPages(loadedPages);
         setCurrentPage(0);

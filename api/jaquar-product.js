@@ -31,6 +31,7 @@ module.exports = async (req, res) => {
         'X-Forwarded-For': '103.21.125.1',
       },
     });
+    if (!resp.ok) return res.status(502).json({ error: `Upstream returned HTTP ${resp.status}` });
     const html = await resp.text();
 
     // Extract product name
