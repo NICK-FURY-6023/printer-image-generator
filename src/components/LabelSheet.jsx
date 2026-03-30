@@ -87,12 +87,13 @@ function LabelCell({ label, fontScale = 1 }) {
 
         {/* Product Name - only show if filled */}
         {product && (
-          <div style={{ display: 'flex', fontSize: s(7.5), lineHeight: 1.3 }}>
-            <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm' }}>Product Name</span>
-            <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm' }}>:</span>
+          <div style={{ display: 'flex', fontSize: s(6.5), lineHeight: 1.3 }}>
+            <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm', fontSize: s(7) }}>Product Name</span>
+            <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm', fontSize: s(7) }}>:</span>
             <span style={{
-              fontWeight: 900, textTransform: 'uppercase', wordBreak: 'break-word',
-              overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
+              fontWeight: 500, textTransform: 'uppercase', wordBreak: 'break-word',
+              overflow: 'hidden', display: '-webkit-box',
+              WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
             }}>
               {product}
             </span>
