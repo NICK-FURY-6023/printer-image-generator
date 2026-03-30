@@ -461,9 +461,9 @@ export default function Landing() {
         </div>
 
         <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 1.5, repeat: Infinity }}
-          style={{ position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: '#475569' }}>
+          style={{ position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: '#64748b' }}>
           <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Scroll</div>
-          <Icon d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" size={16} color="#334155" />
+          <Icon d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" size={16} color="#64748b" />
         </motion.div>
       </section>
 
@@ -703,7 +703,7 @@ export default function Landing() {
       <section style={{ position: 'relative', zIndex: 1, padding: '80px clamp(20px, 4vw, 48px)' }}>
         <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
           <Reveal>
-            <div style={{ fontSize: 10, color: '#475569', letterSpacing: 2.5, fontWeight: 700, textTransform: 'uppercase', marginBottom: 28 }}>Built With Modern Technology</div>
+            <div style={{ fontSize: 10, color: '#64748b', letterSpacing: 2.5, fontWeight: 700, textTransform: 'uppercase', marginBottom: 28 }}>Built With Modern Technology</div>
             <div style={{ display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
               {TECH.map(t => (
                 <motion.span key={t}
@@ -748,15 +748,15 @@ export default function Landing() {
         <div style={{ maxWidth: 1300, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <BrandMark size={24} />
-            <span style={{ fontSize: 12, color: '#475569', fontWeight: 600 }}>Shree Ganpati Agency \u2014 Label Print System v3.0</span>
+            <span style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Shree Ganpati Agency \u2014 Label Print System v3.0</span>
           </div>
           <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
             <a href="https://github.com/ATUL-MAHARAJ/printer-image-generator" target="_blank" rel="noreferrer"
-              style={{ fontSize: 11, color: '#1e293b', textDecoration: 'none', fontWeight: 500 }}
-              onMouseEnter={e => { e.target.style.color = '#f97316'; }} onMouseLeave={e => { e.target.style.color = '#1e293b'; }}>
+              style={{ fontSize: 11, color: '#64748b', textDecoration: 'none', fontWeight: 500 }}
+              onMouseEnter={e => { e.target.style.color = '#f97316'; }} onMouseLeave={e => { e.target.style.color = '#64748b'; }}>
               GitHub
             </a>
-            <span style={{ fontSize: 11, color: '#0f172a' }}>\u00A9 2025 All rights reserved</span>
+            <span style={{ fontSize: 11, color: '#64748b' }}>\u00A9 2025 All rights reserved</span>
           </div>
         </div>
       </footer>

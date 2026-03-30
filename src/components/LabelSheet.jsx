@@ -60,11 +60,11 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
       <div style={{
         width: '18mm', flexShrink: 0, borderRight: B,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '2mm', overflow: 'hidden',
+        padding: '1.5mm 1.5mm 1.5mm 3mm', overflow: 'hidden',
       }}>
         {logoUrl && !logoError ? (
           <img src={logoUrl} alt={brand} crossOrigin="anonymous" onError={() => setLogoError(true)} style={{
-            maxWidth: '100%', maxHeight: '100%',
+            maxWidth: '95%', maxHeight: '95%',
             objectFit: 'contain',
           }} />
         ) : (
