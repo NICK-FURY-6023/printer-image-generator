@@ -49,9 +49,9 @@ function LabelCell({ label, fontScale = 1 }) {
 
       {/* ── LEFT — Brand Logo ── */}
       <div style={{
-        width: '22mm', flexShrink: 0, borderRight: B,
+        width: '18mm', flexShrink: 0, borderRight: B,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '1mm', overflow: 'hidden',
+        padding: '2mm', overflow: 'hidden',
       }}>
         {logoUrl ? (
           <img src={logoUrl} alt={brand} crossOrigin="anonymous" style={{
@@ -73,25 +73,23 @@ function LabelCell({ label, fontScale = 1 }) {
       {/* ── CENTER — Product Details ── */}
       <div style={{
         flex: '1 1 auto', display: 'flex', flexDirection: 'column',
-        justifyContent: 'center', padding: '1mm 2mm',
-        overflow: 'hidden', minWidth: 0, gap: '0.6mm',
+        justifyContent: 'center', padding: '1.5mm 2.5mm',
+        overflow: 'hidden', minWidth: 0, gap: '0.8mm',
       }}>
-        {/* Product Code - only show if filled */}
         {code && (
-          <div style={{ display: 'flex', alignItems: 'baseline', fontSize: s(7), lineHeight: 1.2, flexShrink: 0 }}>
-            <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm' }}>Product Code</span>
-            <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm' }}>:</span>
+          <div style={{ display: 'flex', alignItems: 'baseline', fontSize: s(6.5), lineHeight: 1.25, flexShrink: 0 }}>
+            <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '18mm' }}>Product Code</span>
+            <span style={{ fontWeight: 800, flexShrink: 0, margin: '0 1mm' }}>:</span>
             <span style={{ fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{code}</span>
           </div>
         )}
 
-        {/* Product Name - only show if filled */}
         {product && (
-          <div style={{ display: 'flex', fontSize: s(6.5), lineHeight: 1.2, flexShrink: 0 }}>
-            <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm', fontSize: s(7) }}>Product Name</span>
-            <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm', fontSize: s(7) }}>:</span>
+          <div style={{ display: 'flex', fontSize: s(6), lineHeight: 1.25, flexShrink: 0 }}>
+            <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '18mm', fontSize: s(6.5) }}>Product Name</span>
+            <span style={{ fontWeight: 800, flexShrink: 0, margin: '0 1mm', fontSize: s(6.5) }}>:</span>
             <span style={{
-              fontWeight: 500, textTransform: 'uppercase', wordBreak: 'break-word',
+              fontWeight: 600, textTransform: 'uppercase', wordBreak: 'break-word',
               overflow: 'hidden', display: '-webkit-box',
               WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
               textOverflow: 'ellipsis',
@@ -101,13 +99,12 @@ function LabelCell({ label, fontScale = 1 }) {
           </div>
         )}
 
-        {/* Product Description - only show if filled */}
         {description && (
           <div style={{ display: 'flex', fontSize: s(5.5), lineHeight: 1.2, flexShrink: 0 }}>
-            <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm', fontSize: s(7) }}>Product Desc</span>
-            <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm', fontSize: s(7) }}>:</span>
+            <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '18mm', fontSize: s(6.5) }}>Product Desc</span>
+            <span style={{ fontWeight: 800, flexShrink: 0, margin: '0 1mm', fontSize: s(6.5) }}>:</span>
             <span style={{
-              fontWeight: 600, wordBreak: 'break-word',
+              fontWeight: 500, wordBreak: 'break-word',
               overflow: 'hidden', display: '-webkit-box',
               WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
               textOverflow: 'ellipsis',
@@ -117,12 +114,11 @@ function LabelCell({ label, fontScale = 1 }) {
           </div>
         )}
 
-        {/* Product Price - only show if filled */}
         {price && (
-          <div style={{ display: 'flex', alignItems: 'baseline', fontSize: s(7), lineHeight: 1.2, flexShrink: 0 }}>
-            <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm' }}>Product Price</span>
-            <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm' }}>:</span>
-            <span style={{ fontWeight: 900, fontSize: s(8.5) }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', fontSize: s(6.5), lineHeight: 1.25, flexShrink: 0 }}>
+            <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '18mm' }}>Product Price</span>
+            <span style={{ fontWeight: 800, flexShrink: 0, margin: '0 1mm' }}>:</span>
+            <span style={{ fontWeight: 900, fontSize: s(8) }}>
               {`\u20B9 ${price}`}
             </span>
           </div>
@@ -132,9 +128,9 @@ function LabelCell({ label, fontScale = 1 }) {
       {/* ── RIGHT — QR Code (only if product URL exists) ── */}
       {qrDataUrl && (
         <div style={{
-          width: '14mm', flexShrink: 0, borderLeft: B,
+          width: '13mm', flexShrink: 0, borderLeft: B,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '1mm', overflow: 'hidden',
+          padding: '1.5mm', overflow: 'hidden',
         }}>
           <img src={qrDataUrl} alt="QR" style={{
             width: '100%', maxHeight: '100%',
