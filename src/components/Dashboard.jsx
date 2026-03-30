@@ -571,7 +571,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex flex-col no-print" style={{ background: '#0f172a', color: '#f1f5f9' }}>
       {/* ─── Navbar ─── */}
-      <nav style={{ background: 'linear-gradient(135deg,#ea580c 0%,#c2410c 50%,#9a3412 100%)', boxShadow: '0 4px 20px rgba(234,88,12,0.4)', flexShrink: 0, position: 'relative', zIndex: 10 }}>
+      <nav style={{ background: 'linear-gradient(135deg,#ea580c 0%,#c2410c 50%,#9a3412 100%)', boxShadow: '0 4px 20px rgba(234,88,12,0.4), 0 8px 32px rgba(0,0,0,0.3)', flexShrink: 0, position: 'relative', zIndex: 10 }}>
         <div style={{ maxWidth: 1600, margin: '0 auto', padding: '0 16px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           {/* Brand */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
@@ -645,9 +645,9 @@ export default function Dashboard() {
       </nav>
 
       {/* ─── Page Navigator ─── */}
-      <div style={{
-        background: '#1e293b', borderBottom: '1px solid #334155', flexShrink: 0,
-        display: 'flex', alignItems: 'center', gap: 6, padding: '6px 16px',
+      <div className="depth-shadow" style={{
+        background: 'linear-gradient(180deg, #1e293b, #172032)', borderBottom: '1px solid #334155', flexShrink: 0,
+        display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px',
         maxWidth: 1600, width: '100%', margin: '0 auto',
       }}>
         <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600, letterSpacing: '0.05em', marginRight: 4 }}>PAGES</span>
@@ -734,11 +734,11 @@ export default function Dashboard() {
       </div>
 
       {/* ─── Main split ─── */}
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', maxWidth: 1600, width: '100%', margin: '0 auto' }}>
-        <div style={{ width: '42%', overflowY: 'auto', flexShrink: 0, borderRight: '1px solid #1e293b', background: '#0f172a' }}>
+      <div className="panel-3d" style={{ display: 'flex', flex: 1, overflow: 'hidden', maxWidth: 1600, width: '100%', margin: '0 auto' }}>
+        <div style={{ width: '42%', overflowY: 'auto', flexShrink: 0, borderRight: '1px solid #1e293b', background: 'linear-gradient(180deg, #0f172a, #0c1322)' }}>
           <LabelEditor labels={labels} setLabels={setLabels} />
         </div>
-        <div style={{ flex: 1, overflowY: 'auto', background: '#111827' }}>
+        <div style={{ flex: 1, overflowY: 'auto', background: 'linear-gradient(180deg, #111827, #0d1421)' }}>
           <LabelPreview
             labels={labels}
             pages={pages}

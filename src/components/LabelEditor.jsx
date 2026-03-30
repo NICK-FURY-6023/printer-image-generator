@@ -434,8 +434,45 @@ export default function LabelEditor({ labels, setLabels }) {
         </button>
       </div>
 
+      {/* Active Selection Indicator */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(249,115,22,0.12), rgba(234,88,12,0.08))',
+        border: '1px solid rgba(249,115,22,0.3)',
+        borderRadius: 10, padding: '8px 14px',
+        display: 'flex', alignItems: 'center', gap: 10,
+        animation: 'glow-ring 2.5s ease-in-out infinite',
+      }}>
+        <div style={{
+          width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+          background: 'linear-gradient(135deg,#f97316,#ea580c)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 12, fontWeight: 700, color: 'white',
+          boxShadow: '0 0 12px rgba(249,115,22,0.4)',
+        }}>
+          {activeIndex + 1}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: '#f97316', letterSpacing: '0.1em', marginBottom: 1 }}>
+            CURRENTLY EDITING — LABEL {activeIndex + 1}
+          </div>
+          <div style={{ fontSize: 12, color: '#f1f5f9', fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+            {labels[activeIndex]?.product?.trim() || labels[activeIndex]?.code?.trim() || 'Empty label'}
+            {labels[activeIndex]?.code?.trim() && labels[activeIndex]?.product?.trim() && (
+              <span style={{ color: '#94a3b8', fontWeight: 400, marginLeft: 6, fontSize: 10, fontFamily: 'monospace' }}>
+                {labels[activeIndex].code}
+              </span>
+            )}
+          </div>
+        </div>
+        {isFilled(labels[activeIndex]) && (
+          <span style={{ fontSize: 9, color: '#22c55e', background: 'rgba(34,197,94,0.12)', padding: '3px 8px', borderRadius: 10, fontWeight: 600, flexShrink: 0 }}>
+            ✓ FILLED
+          </span>
+        )}
+      </div>
+
       {/* Dot Navigator */}
-      <div style={{ background: '#1e293b', borderRadius: 12, padding: '12px 14px', border: '1px solid #334155' }}>
+      <div className="depth-shadow" style={{ background: 'linear-gradient(180deg, #1e293b, #1a2536)', borderRadius: 12, padding: '12px 14px', border: '1px solid #334155' }}>
         <div style={{ fontSize: 10, fontWeight: 600, color: '#475569', letterSpacing: '0.08em', marginBottom: 10 }}>
           JUMP TO LABEL
         </div>

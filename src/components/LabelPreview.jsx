@@ -199,8 +199,8 @@ export default function LabelPreview({
 
           const textRows = [];
           if (code)    textRows.push({ lbl: 'Product Code',  val: code,                 lblS: s(6), valS: s(6),   vBold: true,  max: 1 });
-          if (product) textRows.push({ lbl: 'Product Name',  val: product.toUpperCase(), lblS: s(6), valS: s(5.5), vBold: false, max: 2 });
-          if (desc)    textRows.push({ lbl: 'Product Desc',  val: desc,                  lblS: s(6), valS: s(5),   vBold: false, max: 2 });
+          if (product) textRows.push({ lbl: 'Product Name',  val: product.toUpperCase(), lblS: s(6), valS: s(5.5), vBold: true,  max: 2 });
+          if (desc)    textRows.push({ lbl: 'Product Desc',  val: desc,                  lblS: s(6), valS: s(5),   vBold: true,  max: 2 });
           if (price)   textRows.push({ lbl: 'Product Price', val: `Rs. ${price}`,        lblS: s(6), valS: s(7),   vBold: true,  max: 1 });
 
           if (textRows.length === 0) continue;
@@ -255,8 +255,8 @@ export default function LabelPreview({
     <div ref={containerRef} style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: 16, gap: 12 }}>
 
       {/* ── Toolbar ─────────────────────────────────────────────────────── */}
-      <div style={{
-        background: '#1e293b', borderRadius: 12, padding: '10px 14px',
+      <div className="depth-shadow" style={{
+        background: 'linear-gradient(180deg, #1e293b, #1a2536)', borderRadius: 12, padding: '10px 14px',
         border: '1px solid #334155', display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center',
         flexShrink: 0,
       }}>
@@ -371,9 +371,9 @@ export default function LabelPreview({
 
       {/* ── Scaled preview (screen only) ──────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingBottom: 16, overflow: 'hidden' }}>
-        <div className="print-preview-frame" style={{
-          width: A4_W * scale, height: A4_H * scale, flexShrink: 0, borderRadius: 4, overflow: 'hidden',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)',
+        <div className="print-preview-frame card-3d" style={{
+          width: A4_W * scale, height: A4_H * scale, flexShrink: 0, borderRadius: 6, overflow: 'hidden',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 4px 16px rgba(249,115,22,0.08)',
         }}>
           <div className="print-scale-wrapper" style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: A4_W, height: A4_H }}>
             <LabelSheet labels={labels} extraTopMargin={printMargin} fontScale={fontScale} />

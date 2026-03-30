@@ -20,13 +20,17 @@
 
 ## 📸 Screenshots
 
-| Landing Page | Dashboard (Editor + Preview) |
+| Landing Page (3D Particles + Animations) | Dashboard (3D Depth + Glassmorphism) |
 |:---:|:---:|
-| ![Landing](https://via.placeholder.com/600x340/0f172a/f97316?text=Landing+Page) | ![Dashboard](https://via.placeholder.com/600x340/0f172a/f97316?text=Dashboard) |
+| ![Landing](https://via.placeholder.com/600x340/0f172a/f97316?text=3D+Landing+%7C+Particles+%2B+TiltCard) | ![Dashboard](https://via.placeholder.com/600x340/0f172a/f97316?text=3D+Dashboard+%7C+42%25+Editor+%2F+58%25+Preview) |
 
-| Jaquar Product Search | PDF Vector Export |
+| Selection Indicator + Jaquar Search | Multi-Page PDF Export |
 |:---:|:---:|
-| ![Search](https://via.placeholder.com/600x340/0f172a/f97316?text=Jaquar+Search+%284600%2B+Products%29) | ![PDF](https://via.placeholder.com/600x340/ffffff/111111?text=Vector+PDF+%28100-500KB%29) |
+| ![Search](https://via.placeholder.com/600x340/0f172a/f97316?text=Active+Label+Glow+%2B+4600%2B+Products) | ![PDF](https://via.placeholder.com/600x340/ffffff/111111?text=Multi-Page+Vector+PDF+%7C+100-500KB) |
+
+| Page Navigator (Add/Remove/Duplicate) | Print History (Auto-named) |
+|:---:|:---:|
+| ![Pages](https://via.placeholder.com/600x340/0f172a/f97316?text=Multi-Page+Navigator+%2B+Badges) | ![History](https://via.placeholder.com/600x340/0f172a/f97316?text=Auto-Named+History+Entries) |
 
 ---
 
@@ -55,6 +59,27 @@
 - **React.memo** on label cells — only re-renders cells that actually changed
 - Main bundle reduced from **500KB → 235KB** (53% smaller)
 - Jaquar search: 150ms debounce, module-level cache, sorted by prefix match
+
+### 🎨 3D Dynamic UI
+- **3D depth panels** — CSS perspective + translateZ for layered depth effect
+- **Card hover lift** — Cards lift up with enhanced shadow on hover
+- **Active label glow** — Animated pulsing ring on the selected label card
+- **"Currently Editing" bar** — Floating indicator showing active label name, code, and status
+- **Enhanced dot navigator** — Scale + glow animations on active/filled dots
+- **Gradient backgrounds** — Subtle depth gradients on all panels
+
+### 📄 Multi-page Labels
+- Add unlimited pages — each page holds 12 labels (one A4 sheet)
+- Page navigator bar with filled-count badges per page
+- Add, remove, and duplicate pages
+- PDF exports all pages × copies
+- Ctrl+P prints all pages
+- History and templates save/restore all pages
+
+### 🏷️ History Auto-naming
+- Auto-generated names from product codes and brands
+- Format: `Jaquar ALD-CHR-079N +5 (2pg)`
+- Easily identify entries without manual naming
 
 ---
 
