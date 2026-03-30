@@ -73,27 +73,28 @@ function LabelCell({ label, fontScale = 1 }) {
       {/* ── CENTER — Product Details ── */}
       <div style={{
         flex: '1 1 auto', display: 'flex', flexDirection: 'column',
-        justifyContent: 'center', padding: '1.5mm 2.5mm',
-        overflow: 'hidden', minWidth: 0, gap: '1mm',
+        justifyContent: 'center', padding: '1mm 2mm',
+        overflow: 'hidden', minWidth: 0, gap: '0.6mm',
       }}>
         {/* Product Code - only show if filled */}
         {code && (
-          <div style={{ display: 'flex', alignItems: 'baseline', fontSize: s(7), lineHeight: 1.3 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', fontSize: s(7), lineHeight: 1.2, flexShrink: 0 }}>
             <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm' }}>Product Code</span>
             <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm' }}>:</span>
-            <span style={{ fontWeight: 700 }}>{code}</span>
+            <span style={{ fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{code}</span>
           </div>
         )}
 
         {/* Product Name - only show if filled */}
         {product && (
-          <div style={{ display: 'flex', fontSize: s(6.5), lineHeight: 1.3 }}>
+          <div style={{ display: 'flex', fontSize: s(6.5), lineHeight: 1.2, flexShrink: 0 }}>
             <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm', fontSize: s(7) }}>Product Name</span>
             <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm', fontSize: s(7) }}>:</span>
             <span style={{
               fontWeight: 500, textTransform: 'uppercase', wordBreak: 'break-word',
               overflow: 'hidden', display: '-webkit-box',
               WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+              textOverflow: 'ellipsis',
             }}>
               {product}
             </span>
@@ -102,13 +103,14 @@ function LabelCell({ label, fontScale = 1 }) {
 
         {/* Product Description - only show if filled */}
         {description && (
-          <div style={{ display: 'flex', fontSize: s(6), lineHeight: 1.3 }}>
+          <div style={{ display: 'flex', fontSize: s(5.5), lineHeight: 1.2, flexShrink: 0 }}>
             <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm', fontSize: s(7) }}>Product Desc</span>
             <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm', fontSize: s(7) }}>:</span>
             <span style={{
               fontWeight: 600, wordBreak: 'break-word',
               overflow: 'hidden', display: '-webkit-box',
               WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+              textOverflow: 'ellipsis',
             }}>
               {description}
             </span>
@@ -117,7 +119,7 @@ function LabelCell({ label, fontScale = 1 }) {
 
         {/* Product Price - only show if filled */}
         {price && (
-          <div style={{ display: 'flex', alignItems: 'baseline', fontSize: s(7), lineHeight: 1.3 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', fontSize: s(7), lineHeight: 1.2, flexShrink: 0 }}>
             <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm' }}>Product Price</span>
             <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm' }}>:</span>
             <span style={{ fontWeight: 900, fontSize: s(8.5) }}>
