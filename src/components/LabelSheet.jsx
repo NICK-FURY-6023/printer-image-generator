@@ -14,8 +14,7 @@ function LabelCell({ label, fontScale = 1 }) {
   const product = label.product?.trim() || '';
   const description = label.description?.trim() || '';
   const price = label.price?.trim() || '';
-  const logoUrl = label.logoUrl?.trim() || '';
-  const showLogoSection = !!(logoUrl || brand);
+  const logoUrl = label.logoUrl?.trim() || 'https://iconlogovector.com/uploads/images/2025/03/lg-67d9f91338422-Jaquar.webp';
   const s = (pt) => `${pt * fontScale}pt`;
   const B = '0.2mm solid #222';
 
@@ -29,30 +28,28 @@ function LabelCell({ label, fontScale = 1 }) {
       WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact',
     }}>
 
-      {/* ── LEFT — Brand Logo (only if logo URL or brand name provided) ── */}
-      {showLogoSection && (
-        <div style={{
-          width: '22mm', flexShrink: 0, borderRight: B,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '1mm', overflow: 'hidden',
-        }}>
-          {logoUrl ? (
-            <img src={logoUrl} alt={brand} style={{
-              maxWidth: '100%', maxHeight: '100%',
-              objectFit: 'contain',
-            }} />
-          ) : (
-            <span style={{
-              fontSize: s(10), fontWeight: 700, fontStyle: 'italic',
-              fontFamily: 'Georgia, "Times New Roman", serif',
-              textAlign: 'center', wordBreak: 'break-word',
-              lineHeight: 1.1,
-            }}>
-              {brand}
-            </span>
-          )}
-        </div>
-      )}
+      {/* ── LEFT — Brand Logo ── */}
+      <div style={{
+        width: '22mm', flexShrink: 0, borderRight: B,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '1mm', overflow: 'hidden',
+      }}>
+        {logoUrl ? (
+          <img src={logoUrl} alt={brand} style={{
+            maxWidth: '100%', maxHeight: '100%',
+            objectFit: 'contain',
+          }} />
+        ) : (
+          <span style={{
+            fontSize: s(10), fontWeight: 700, fontStyle: 'italic',
+            fontFamily: 'Georgia, "Times New Roman", serif',
+            textAlign: 'center', wordBreak: 'break-word',
+            lineHeight: 1.1,
+          }}>
+            {brand || <span style={{ color: '#ccc', fontStyle: 'normal', fontWeight: 400, fontSize: s(7) }}>Brand</span>}
+          </span>
+        )}
+      </div>
 
       {/* ── RIGHT — Product Details ── */}
       <div style={{
