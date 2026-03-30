@@ -514,6 +514,37 @@ export default function Dashboard() {
   });
   const [currentPage, setCurrentPage] = useState(0);
 
+  // ── Undo / Redo (must be before setLabels which depends on pushUndo) ──
+  const undoStack = useRef([]);
+  const redoStack = useRef([]);
+  const skipHistory = useRef(false);
+
+  const pushUndo = useCallback((prevPages) => {
+    if (skipHistory.current) return;
+    undoStack.current = [...undoStack.current.slice(-29), JSON.stringify(prevPages)];
+    redoStack.current = [];
+  }, []);
+
+  const handleUndo = useCallback(() => {
+    if (!undoStack.current.length) { toast('Nothing to undo', { icon: '↩️' }); return; }
+    const prev = undoStack.current.pop();
+    redoStack.current.push(JSON.stringify(pages));
+    skipHistory.current = true;
+    setPages(JSON.parse(prev));
+    skipHistory.current = false;
+    toast('Undo', { icon: '↩️', duration: 1000 });
+  }, [pages]);
+
+  const handleRedo = useCallback(() => {
+    if (!redoStack.current.length) { toast('Nothing to redo', { icon: '↪️' }); return; }
+    const next = redoStack.current.pop();
+    undoStack.current.push(JSON.stringify(pages));
+    skipHistory.current = true;
+    setPages(JSON.parse(next));
+    skipHistory.current = false;
+    toast('Redo', { icon: '↪️', duration: 1000 });
+  }, [pages]);
+
   // Current page's labels (derived)
   const labels = pages[currentPage] || initialLabels();
   // Bug #2 fix: use functional setPages to avoid stale currentPage
@@ -575,37 +606,6 @@ export default function Dashboard() {
   const [copies, setCopies] = useState(1);
   const [fontScale, setFontScale] = useState(1);
   const autoSaveTimer = useRef(null);
-
-  // ── Undo / Redo ──
-  const undoStack = useRef([]);
-  const redoStack = useRef([]);
-  const skipHistory = useRef(false);
-
-  const pushUndo = useCallback((prevPages) => {
-    if (skipHistory.current) return;
-    undoStack.current = [...undoStack.current.slice(-29), JSON.stringify(prevPages)];
-    redoStack.current = [];
-  }, []);
-
-  const handleUndo = useCallback(() => {
-    if (!undoStack.current.length) { toast('Nothing to undo', { icon: '↩️' }); return; }
-    const prev = undoStack.current.pop();
-    redoStack.current.push(JSON.stringify(pages));
-    skipHistory.current = true;
-    setPages(JSON.parse(prev));
-    skipHistory.current = false;
-    toast('Undo', { icon: '↩️', duration: 1000 });
-  }, [pages]);
-
-  const handleRedo = useCallback(() => {
-    if (!redoStack.current.length) { toast('Nothing to redo', { icon: '↪️' }); return; }
-    const next = redoStack.current.pop();
-    undoStack.current.push(JSON.stringify(pages));
-    skipHistory.current = true;
-    setPages(JSON.parse(next));
-    skipHistory.current = false;
-    toast('Redo', { icon: '↪️', duration: 1000 });
-  }, [pages]);
 
   // Auto-save draft (debounced on change + periodic every 30s)
   const autoFadeTimer = useRef(null);
