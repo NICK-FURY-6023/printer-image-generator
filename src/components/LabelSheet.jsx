@@ -11,15 +11,20 @@
 import { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
 
-// Generate QR code data URL (cached per URL)
-const qrCache = {};
+// Generate QR code data URL (LRU cache — max 50 entries)
+const qrCache = new Map();
+const QR_CACHE_MAX = 50;
 function useQRCode(url) {
-  const [dataUrl, setDataUrl] = useState(qrCache[url] || '');
+  const [dataUrl, setDataUrl] = useState(qrCache.get(url) || '');
   useEffect(() => {
     if (!url) { setDataUrl(''); return; }
-    if (qrCache[url]) { setDataUrl(qrCache[url]); return; }
+    if (qrCache.has(url)) { setDataUrl(qrCache.get(url)); return; }
     QRCode.toDataURL(url, { width: 120, margin: 0, errorCorrectionLevel: 'M' })
-      .then(d => { qrCache[url] = d; setDataUrl(d); })
+      .then(d => {
+        if (qrCache.size >= QR_CACHE_MAX) qrCache.delete(qrCache.keys().next().value);
+        qrCache.set(url, d);
+        setDataUrl(d);
+      })
       .catch(() => setDataUrl(''));
   }, [url]);
   return dataUrl;
@@ -36,6 +41,7 @@ function LabelCell({ label, fontScale = 1 }) {
   const qrDataUrl = useQRCode(productUrl);
   const s = (pt) => `${pt * fontScale}pt`;
   const B = '0.2mm solid #222';
+  const [logoError, setLogoError] = useState(false);
 
   return (
     <div style={{
@@ -53,8 +59,8 @@ function LabelCell({ label, fontScale = 1 }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '2mm', overflow: 'hidden',
       }}>
-        {logoUrl ? (
-          <img src={logoUrl} alt={brand} crossOrigin="anonymous" style={{
+        {logoUrl && !logoError ? (
+          <img src={logoUrl} alt={brand} crossOrigin="anonymous" onError={() => setLogoError(true)} style={{
             maxWidth: '100%', maxHeight: '100%',
             objectFit: 'contain',
           }} />

@@ -184,7 +184,8 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
   // Close dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+      if (!wrapperRef.current) return;
+      if (!wrapperRef.current.contains(e.target)) {
         setShowDropdown(false);
       }
     };
@@ -307,7 +308,15 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
                     value={label[key] || ''}
                     onChange={e => {
                       if (searchable) handleSearchableChange(key, e.target.value);
-                      else { onChange(key, e.target.value); if (key === 'price') setPriceHint(''); }
+                      else {
+                        let val = e.target.value;
+                        // Sanitize logo URL — only allow http(s) and relative paths
+                        if (key === 'logoUrl' && val.trim() && !/^(https?:\/\/|\/)/i.test(val.trim())) {
+                          val = '';
+                        }
+                        onChange(key, val);
+                        if (key === 'price') setPriceHint('');
+                      }
                     }}
                     onBlur={e => {
                       if (key === 'price' && e.target.value.trim()) {

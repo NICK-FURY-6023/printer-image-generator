@@ -110,8 +110,8 @@ export default function LabelPreview({
       pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', 0, 0, 210, 297);
       pdf.save('ganpati-labels.pdf');
       toast.success('PDF downloaded!', { id: tid });
-    } catch {
-      toast.error('PDF failed. Use Print → Save as PDF instead.', { id: tid });
+    } catch (err) {
+      toast.error(`PDF generation failed: ${err?.message || 'Unknown error'}. Try Ctrl+P → Save as PDF.`, { id: tid });
     } finally {
       setPdfLoading(false);
     }

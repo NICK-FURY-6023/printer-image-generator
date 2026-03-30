@@ -7,8 +7,10 @@ function verifyToken(req) {
   return jwt.verify(authHeader.slice(7), process.env.JWT_SECRET);
 }
 
+const ALLOWED_ORIGIN = process.env.FRONTEND_URL || '*';
+
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
   res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -31,6 +33,9 @@ module.exports = async (req, res) => {
       const name = (req.body.name || '').trim();
       const label_data = req.body.label_data;
       if (!name || name.length > 100) return res.status(400).json({ error: 'Template name required (max 100 chars)' });
+      if (label_data !== undefined && (!Array.isArray(label_data) || label_data.length < 1 || label_data.length > 12)) {
+        return res.status(400).json({ error: 'label_data must be array of 1-12 labels' });
+      }
       const data = await db.updateTemplate(id, name, label_data);
       return res.json(data);
     }
