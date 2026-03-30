@@ -637,6 +637,17 @@ export default function Dashboard() {
     return () => clearInterval(periodicSaveTimer.current);
   }, [pages]);
 
+  // These must be defined before the keyboard handler useEffect that references them
+  const openSave = useCallback(() => { setTemplateManagerMode('save'); setShowTemplateManager(true); }, []);
+  const openLoad = useCallback(() => { setTemplateManagerMode('load'); setShowTemplateManager(true); }, []);
+
+  const handlePrint = useCallback(() => {
+    const totalFilled = pages.reduce((sum, p) => sum + p.filter(l => l.product?.trim()).length, 0);
+    if (!totalFilled) { toast.error('No labels filled — nothing to print!'); return; }
+    logHistory('print', currentTemplateName, totalFilled, pages, copies);
+    window.print();
+  }, [pages, currentTemplateName, copies]);
+
   // Bug #8 fix: useRef pattern — single stable listener, no dep churn
   const actionsRef = useRef({ handlePrint: null, openSave: null, handleUndo: null, handleRedo: null });
   useEffect(() => { actionsRef.current = { handlePrint, openSave, handleUndo, handleRedo }; });
@@ -675,15 +686,6 @@ export default function Dashboard() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  const openSave = useCallback(() => { setTemplateManagerMode('save'); setShowTemplateManager(true); }, []);
-  const openLoad = useCallback(() => { setTemplateManagerMode('load'); setShowTemplateManager(true); }, []);
-
-  const handlePrint = useCallback(() => {
-    const totalFilled = pages.reduce((sum, p) => sum + p.filter(l => l.product?.trim()).length, 0);
-    if (!totalFilled) { toast.error('No labels filled — nothing to print!'); return; }
-    logHistory('print', currentTemplateName, totalFilled, pages, copies);
-    window.print();
-  }, [pages, currentTemplateName, copies]);
 
   const handleTemplateLoad = (template) => {
     const raw = template.label_data || template.labelData;
