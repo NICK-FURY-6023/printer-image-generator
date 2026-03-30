@@ -1,7 +1,10 @@
 /**
  * Vercel serverless function — fetch single product detail from jaquar.com
  * GET /api/jaquar-product?url=/en/ald-chr-193?Id=290
- * Returns { name, code, description, image, range }
+ * Returns { name, code, description, image, range, price, priceRaw }
+ *
+ * Uses X-Forwarded-For with Indian IP so Jaquar returns MRP in the HTML
+ * (prices are geo-restricted to India).
  */
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -19,6 +22,8 @@ module.exports = async (req, res) => {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'text/html',
+        'Accept-Language': 'en-IN,hi;q=0.9,en;q=0.8',
+        'X-Forwarded-For': '103.21.125.1',
       },
     });
     const html = await resp.text();
@@ -34,7 +39,6 @@ module.exports = async (req, res) => {
     // Extract description
     const descMatch = html.match(/itemprop="description">([\s\S]*?)<\/div>/);
     let description = descMatch ? descMatch[1].trim() : '';
-    // Clean HTML tags from description
     description = description.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 
     // Extract range
@@ -45,8 +49,18 @@ module.exports = async (req, res) => {
     const imgMatch = html.match(/id="main-product-img-\d+"[^>]*src="([^"]*)"/);
     const image = imgMatch ? imgMatch[1] : '';
 
+    // Extract MRP price (geo-restricted to India — we spoof Indian IP)
+    let price = null;
+    let priceRaw = null;
+    const priceMatch = html.match(/class="price-value-\d+"[^>]*content="([\d.]+)"[^>]*>\s*([\s\S]*?)<\/span>/);
+    if (priceMatch) {
+      priceRaw = parseFloat(priceMatch[1]);
+      const priceText = priceMatch[2].replace(/[^\d.,₹\s]/g, '').trim();
+      price = priceText || `₹ ${priceRaw.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+    }
+
     res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=172800');
-    return res.json({ name, code, description, range, image });
+    return res.json({ name, code, description, range, image, price, priceRaw });
   } catch (err) {
     console.error('Jaquar product error:', err);
     return res.status(500).json({ error: 'Failed to fetch product' });

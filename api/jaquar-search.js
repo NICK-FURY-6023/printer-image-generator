@@ -41,6 +41,8 @@ async function fetchSearch(query) {
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       'Accept': 'text/html',
+      'Accept-Language': 'en-IN,hi;q=0.9,en;q=0.8',
+      'X-Forwarded-For': '103.21.125.1',
     },
   });
   return await resp.text();

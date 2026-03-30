@@ -190,9 +190,15 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
     if (detail && detail.description) {
       extraFields.description = detail.description;
     }
-    if (priceData && priceData.price) {
-      extraFields.price = priceData.price;
-      setPriceHint(`~Market Price ₹${priceData.price} (IndustryBuying) — MRP se alag ho sakta hai, verify karo`);
+
+    // Prefer price from product detail page (already has Indian IP), fallback to price API
+    const mrp = (detail && detail.priceRaw) ? detail.priceRaw
+              : (priceData && priceData.priceRaw) ? priceData.priceRaw
+              : null;
+
+    if (mrp) {
+      extraFields.price = mrp.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+      setPriceHint(`✅ Jaquar MRP ₹${mrp.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (jaquar.com)`);
     }
     if (Object.keys(extraFields).length > 0) {
       onFillMulti(extraFields);
@@ -282,8 +288,8 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
                     style={{ fontSize: 12, padding: '7px 10px' }}
                   />
                   {key === 'price' && priceHint && (
-                    <div style={{ fontSize: 9, color: '#f59e0b', marginTop: 3, lineHeight: 1.3 }}>
-                      ⚠️ {priceHint}
+                    <div style={{ fontSize: 9, color: '#22c55e', marginTop: 3, lineHeight: 1.3 }}>
+                      {priceHint}
                     </div>
                   )}
                   {searchable && searchField === key && (
