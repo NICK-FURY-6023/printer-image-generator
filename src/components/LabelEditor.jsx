@@ -3,11 +3,86 @@ import React, { useState, useRef, useEffect } from 'react';
 const FIELDS = [
   { key: 'manufacturer', label: 'Brand Name',          placeholder: 'e.g. Jaquar',                          span: 2 },
   { key: 'logoUrl',      label: 'Brand Logo URL',      placeholder: 'Paste logo image URL',                 span: 2 },
-  { key: 'code',         label: 'Product Code',        placeholder: 'e.g. ALD-CHR-070N',                    span: 1 },
+  { key: 'code',         label: 'Product Code',        placeholder: 'e.g. ALD-CHR-070N',                    span: 1, searchable: true },
   { key: 'price',        label: 'Product Price (₹)',   placeholder: 'e.g. 3800.00',                         span: 1 },
-  { key: 'product',      label: 'Product Name',        placeholder: 'e.g. Concealed Body Diverter',         span: 2 },
+  { key: 'product',      label: 'Product Name',        placeholder: 'e.g. Concealed Body Diverter',         span: 2, searchable: true },
   { key: 'description',  label: 'Product Description', placeholder: 'e.g. High quality brass body diverter', span: 2 },
 ];
+
+/* ── Jaquar Search helpers ── */
+const SEARCH_API = '/api/jaquar-search';
+const PRODUCT_API = '/api/jaquar-product';
+
+async function searchJaquar(query) {
+  if (!query || query.length < 3) return [];
+  try {
+    const res = await fetch(`${SEARCH_API}?q=${encodeURIComponent(query)}`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch { return []; }
+}
+
+async function fetchJaquarProduct(url) {
+  try {
+    const res = await fetch(`${PRODUCT_API}?url=${encodeURIComponent(url)}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch { return null; }
+}
+
+function useDebounce(value, delay = 400) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
+}
+
+/* ── Search Dropdown Component ── */
+function JaquarSearchDropdown({ results, loading, onSelect, visible }) {
+  if (!visible) return null;
+  return (
+    <div style={{
+      position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+      background: '#1e293b', border: '1px solid #334155', borderRadius: 8,
+      maxHeight: 220, overflowY: 'auto', marginTop: 4,
+      boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+    }}>
+      {loading && (
+        <div style={{ padding: '10px 12px', fontSize: 11, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span className="jq-spinner" /> Jaquar se search ho raha hai...
+        </div>
+      )}
+      {!loading && results.length === 0 && (
+        <div style={{ padding: '10px 12px', fontSize: 11, color: '#475569' }}>
+          Koi product nahi mila
+        </div>
+      )}
+      {results.map((p, i) => (
+        <button key={p.id || i} onClick={() => onSelect(p)} style={{
+          display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+          padding: '8px 12px', background: 'transparent', border: 'none',
+          cursor: 'pointer', textAlign: 'left', transition: 'background 0.1s',
+          borderBottom: '1px solid #334155',
+        }}
+          onMouseOver={e => e.currentTarget.style.background = 'rgba(249,115,22,0.1)'}
+          onMouseOut={e => e.currentTarget.style.background = 'transparent'}
+        >
+          {p.image && (
+            <img src={p.image} alt="" style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 4, background: '#fff', flexShrink: 0 }} />
+          )}
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#f1f5f9', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+              {p.name}
+            </div>
+            <div style={{ fontSize: 10, color: '#f97316', marginTop: 1 }}>{p.code}</div>
+          </div>
+        </button>
+      ))}
+    </div>
+  );
+}
 
 const emptyLabel = () => ({
   product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '',
@@ -28,6 +103,69 @@ function LabelCard({ index, label, onChange, onDuplicateToAll, onReset, isActive
   const [open, setOpen] = useState(index === 0);
   const cardRef = useRef(null);
   const filled = isFilled(label);
+
+  // Jaquar search state
+  const [searchField, setSearchField] = useState(null); // which field is being searched
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const debouncedQuery = useDebounce(searchQuery, 500);
+  const dropdownRef = useRef(null);
+
+  // Trigger search when debounced query changes
+  useEffect(() => {
+    if (!debouncedQuery || debouncedQuery.length < 3) {
+      setSearchResults([]);
+      setSearchLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setSearchLoading(true);
+    searchJaquar(debouncedQuery).then(results => {
+      if (!cancelled) {
+        setSearchResults(results);
+        setSearchLoading(false);
+        setShowDropdown(true);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [debouncedQuery]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const handleSearchableChange = (key, value) => {
+    onChange(key, value);
+    setSearchField(key);
+    setSearchQuery(value);
+    if (value.length >= 3) setSearchLoading(true);
+    else setShowDropdown(false);
+  };
+
+  const handleProductSelect = async (product) => {
+    setShowDropdown(false);
+    setSearchQuery('');
+    // Fill basic fields immediately
+    onChange('code', product.code || '');
+    onChange('product', product.name || '');
+
+    // Fetch full details for description
+    if (product.url) {
+      const detail = await fetchJaquarProduct(product.url);
+      if (detail) {
+        if (detail.description) onChange('description', detail.description);
+      }
+    }
+  };
 
   useEffect(() => {
     if (isActive && cardRef.current) {
@@ -79,7 +217,7 @@ function LabelCard({ index, label, onChange, onDuplicateToAll, onReset, isActive
       {open && (
         <div style={{ padding: 14, background: '#0f172a', borderTop: '1px solid #1e293b' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            {FIELDS.map(({ key, label: fl, placeholder, span, section }) => (
+            {FIELDS.map(({ key, label: fl, placeholder, span, section, searchable }) => (
               <React.Fragment key={key}>
                 {section && (
                   <div style={{
@@ -88,18 +226,28 @@ function LabelCard({ index, label, onChange, onDuplicateToAll, onReset, isActive
                     paddingTop: 8, borderTop: '1px solid #334155', marginTop: 2,
                   }}>{section}</div>
                 )}
-                <div style={{ gridColumn: span === 2 ? '1 / -1' : undefined }}>
+                <div style={{ gridColumn: span === 2 ? '1 / -1' : undefined, position: 'relative' }} ref={searchable ? dropdownRef : undefined}>
                   <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#64748b', marginBottom: 4, letterSpacing: '0.05em' }}>
                     {fl}
+                    {searchable && <span style={{ color: '#f97316', fontSize: 9, marginLeft: 4 }}>🔍 Jaquar</span>}
                   </label>
                   <input
                     type="text"
                     value={label[key] || ''}
-                    onChange={e => onChange(key, e.target.value)}
+                    onChange={e => searchable ? handleSearchableChange(key, e.target.value) : onChange(key, e.target.value)}
+                    onFocus={() => { if (searchable && searchResults.length > 0) setShowDropdown(true); }}
                     placeholder={placeholder}
                     className="input-dark"
                     style={{ fontSize: 12, padding: '7px 10px' }}
                   />
+                  {searchable && searchField === key && (
+                    <JaquarSearchDropdown
+                      results={searchResults}
+                      loading={searchLoading}
+                      visible={showDropdown}
+                      onSelect={handleProductSelect}
+                    />
+                  )}
                 </div>
               </React.Fragment>
             ))}

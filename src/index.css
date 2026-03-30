@@ -155,3 +155,14 @@
 }
 .label-card:hover  { border-color: #475569; }
 .label-card.active { border-color: #f97316; box-shadow: 0 0 0 2px rgba(249,115,22,0.2); }
+
+/* Jaquar search spinner */
+.jq-spinner {
+  display: inline-block;
+  width: 12px; height: 12px;
+  border: 2px solid #475569;
+  border-top-color: #f97316;
+  border-radius: 50%;
+  animation: jq-spin 0.6s linear infinite;
+}
+@keyframes jq-spin { to { transform: rotate(360deg); } }
