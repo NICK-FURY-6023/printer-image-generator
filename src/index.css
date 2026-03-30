@@ -39,7 +39,7 @@
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
   grid-template-rows: repeat(6, 1fr) !important;
-  padding: 1.1mm 5mm !important;
+  padding: 1.1mm 0.5mm !important;
   margin: 0 !important;
   background: white !important;
   box-sizing: border-box !important;
