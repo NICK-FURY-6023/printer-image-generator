@@ -111,7 +111,7 @@ export default function LabelPreview({
       ));
 
       const canvas = await html2canvas(clone, {
-        scale: 3, useCORS: true, allowTaint: false,
+        scale: 2, useCORS: true, allowTaint: false,
         backgroundColor: '#ffffff',
         width: A4_W, height: A4_H,
         windowWidth: A4_W, windowHeight: A4_H,
@@ -119,8 +119,8 @@ export default function LabelPreview({
 
       document.body.removeChild(offscreen);
 
-      const pdf = new jsPDF({ format: 'a4', unit: 'mm', orientation: 'portrait' });
-      pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', 0, 0, 210, 297);
+      const pdf = new jsPDF({ format: 'a4', unit: 'mm', orientation: 'portrait', compress: true });
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.75), 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
       pdf.save('ganpati-labels.pdf');
       toast.success('PDF downloaded!', { id: tid });
     } catch (err) {
