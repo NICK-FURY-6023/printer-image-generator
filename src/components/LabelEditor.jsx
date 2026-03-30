@@ -12,6 +12,7 @@ const FIELDS = [
 /* ── Jaquar Search helpers ── */
 const SEARCH_API = '/api/jaquar-search';
 const PRODUCT_API = '/api/jaquar-product';
+const PRICE_API = '/api/jaquar-price';
 
 async function searchJaquar(query) {
   if (!query || query.length < 3) return [];
@@ -25,6 +26,15 @@ async function searchJaquar(query) {
 async function fetchJaquarProduct(url) {
   try {
     const res = await fetch(`${PRODUCT_API}?url=${encodeURIComponent(url)}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch { return null; }
+}
+
+async function fetchJaquarPrice(code) {
+  if (!code) return null;
+  try {
+    const res = await fetch(`${PRICE_API}?code=${encodeURIComponent(code)}`);
     if (!res.ok) return null;
     return await res.json();
   } catch { return null; }
@@ -161,24 +171,30 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
     // Build product URL for Jaquar website
     const jaquarUrl = product.url ? `https://www.jaquar.com${product.url}` : '';
 
-    // Fill all fields at once using onFillMulti (fixes batching issue)
+    // Fill basic fields immediately
     const fields = {
       code: product.code || '',
       product: product.name || '',
       productUrl: jaquarUrl,
     };
-
-    // Fetch full details for description
-    if (product.url) {
-      try {
-        const detail = await fetchJaquarProduct(product.url);
-        if (detail && detail.description) {
-          fields.description = detail.description;
-        }
-      } catch {}
-    }
-
     onFillMulti(fields);
+
+    // Fetch description and price in parallel
+    const [detail, priceData] = await Promise.all([
+      product.url ? fetchJaquarProduct(product.url).catch(() => null) : null,
+      product.code ? fetchJaquarPrice(product.code).catch(() => null) : null,
+    ]);
+
+    const extraFields = {};
+    if (detail && detail.description) {
+      extraFields.description = detail.description;
+    }
+    if (priceData && priceData.price) {
+      extraFields.price = priceData.price;
+    }
+    if (Object.keys(extraFields).length > 0) {
+      onFillMulti(extraFields);
+    }
     setFetchingDetail(false);
   };
 
