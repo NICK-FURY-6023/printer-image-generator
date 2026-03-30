@@ -152,7 +152,7 @@ export default function LabelSheet({ labels, extraTopMargin = 0, fontScale = 1 }
   return (
     <div
       className="sheet print-sheet"
-      style={extraTopMargin !== 0 ? { paddingTop: `${5 + extraTopMargin}mm`, paddingBottom: `${5 - extraTopMargin}mm` } : undefined}
+      style={extraTopMargin !== 0 ? { paddingTop: `${7 + extraTopMargin}mm`, paddingBottom: `${7 - extraTopMargin}mm` } : undefined}
     >
       {safeLabels.map((label, i) => (
         <LabelCell key={i} label={label} fontScale={fontScale} />
