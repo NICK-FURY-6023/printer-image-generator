@@ -14,8 +14,8 @@ function LabelCell({ label, fontScale = 1 }) {
   const product = label.product?.trim() || '';
   const description = label.description?.trim() || '';
   const price = label.price?.trim() || '';
-  // Set default logo permanently
-  const logoUrl = label.logoUrl?.trim() || 'https://iconlogovector.com/uploads/images/2025/03/lg-67d9f91338422-Jaquar.webp';
+  const logoUrl = label.logoUrl?.trim() || '';
+  const showLogoSection = !!(logoUrl || brand);
   const s = (pt) => `${pt * fontScale}pt`;
   const B = '0.2mm solid #222';
 
@@ -29,28 +29,30 @@ function LabelCell({ label, fontScale = 1 }) {
       WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact',
     }}>
 
-      {/* ── LEFT — Brand Logo (top-left corner) ── */}
-      <div style={{
-        width: '22mm', flexShrink: 0, borderRight: B,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '1mm', overflow: 'hidden',
-      }}>
-        {logoUrl ? (
-          <img src={logoUrl} alt={brand} style={{
-            maxWidth: '100%', maxHeight: '100%',
-            objectFit: 'contain',
-          }} />
-        ) : (
-          <span style={{
-            fontSize: s(10), fontWeight: 700, fontStyle: 'italic',
-            fontFamily: 'Georgia, "Times New Roman", serif',
-            textAlign: 'center', wordBreak: 'break-word',
-            lineHeight: 1.1,
-          }}>
-            {brand || <span style={{ color: '#ccc', fontStyle: 'normal', fontWeight: 400, fontSize: s(7) }}>Brand</span>}
-          </span>
-        )}
-      </div>
+      {/* ── LEFT — Brand Logo (only if logo URL or brand name provided) ── */}
+      {showLogoSection && (
+        <div style={{
+          width: '22mm', flexShrink: 0, borderRight: B,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '1mm', overflow: 'hidden',
+        }}>
+          {logoUrl ? (
+            <img src={logoUrl} alt={brand} style={{
+              maxWidth: '100%', maxHeight: '100%',
+              objectFit: 'contain',
+            }} />
+          ) : (
+            <span style={{
+              fontSize: s(10), fontWeight: 700, fontStyle: 'italic',
+              fontFamily: 'Georgia, "Times New Roman", serif',
+              textAlign: 'center', wordBreak: 'break-word',
+              lineHeight: 1.1,
+            }}>
+              {brand}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* ── RIGHT — Product Details ── */}
       <div style={{
@@ -58,46 +60,54 @@ function LabelCell({ label, fontScale = 1 }) {
         justifyContent: 'center', padding: '1.5mm 2.5mm',
         overflow: 'hidden', minWidth: 0, gap: '1mm',
       }}>
-        {/* Product Code */}
-        <div style={{ display: 'flex', alignItems: 'baseline', fontSize: s(7), lineHeight: 1.3 }}>
-          <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm' }}>Product Code</span>
-          <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm' }}>:</span>
-          <span style={{ fontWeight: 700 }}>{code || '----'}</span>
-        </div>
+        {/* Product Code - only show if filled */}
+        {code && (
+          <div style={{ display: 'flex', alignItems: 'baseline', fontSize: s(7), lineHeight: 1.3 }}>
+            <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm' }}>Product Code</span>
+            <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm' }}>:</span>
+            <span style={{ fontWeight: 700 }}>{code}</span>
+          </div>
+        )}
 
-        {/* Product Name */}
-        <div style={{ display: 'flex', fontSize: s(7.5), lineHeight: 1.3 }}>
-          <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm' }}>Product Name</span>
-          <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm' }}>:</span>
-          <span style={{
-            fontWeight: 900, textTransform: 'uppercase', wordBreak: 'break-word',
-            overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
-          }}>
-            {product || '----'}
-          </span>
-        </div>
+        {/* Product Name - only show if filled */}
+        {product && (
+          <div style={{ display: 'flex', fontSize: s(7.5), lineHeight: 1.3 }}>
+            <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm' }}>Product Name</span>
+            <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm' }}>:</span>
+            <span style={{
+              fontWeight: 900, textTransform: 'uppercase', wordBreak: 'break-word',
+              overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
+            }}>
+              {product}
+            </span>
+          </div>
+        )}
 
-        {/* Product Description */}
-        <div style={{ display: 'flex', fontSize: s(6), lineHeight: 1.3 }}>
-          <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm', fontSize: s(7) }}>Product Desc</span>
-          <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm', fontSize: s(7) }}>:</span>
-          <span style={{
-            fontWeight: 600, wordBreak: 'break-word',
-            overflow: 'hidden', display: '-webkit-box',
-            WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-          }}>
-            {description || '----'}
-          </span>
-        </div>
+        {/* Product Description - only show if filled */}
+        {description && (
+          <div style={{ display: 'flex', fontSize: s(6), lineHeight: 1.3 }}>
+            <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm', fontSize: s(7) }}>Product Desc</span>
+            <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm', fontSize: s(7) }}>:</span>
+            <span style={{
+              fontWeight: 600, wordBreak: 'break-word',
+              overflow: 'hidden', display: '-webkit-box',
+              WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+            }}>
+              {description}
+            </span>
+          </div>
+        )}
 
-        {/* Product Price */}
-        <div style={{ display: 'flex', alignItems: 'baseline', fontSize: s(7), lineHeight: 1.3 }}>
-          <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm' }}>Product Price</span>
-          <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm' }}>:</span>
-          <span style={{ fontWeight: 900, fontSize: s(8.5) }}>
-            {price ? `\u20B9 ${price}` : '----'}
-          </span>
-        </div>
+        {/* Product Price - only show if filled */}
+        {price && (
+          <div style={{ display: 'flex', alignItems: 'baseline', fontSize: s(7), lineHeight: 1.3 }}>
+            <span style={{ fontWeight: 800, flexShrink: 0, minWidth: '22mm' }}>Product Price</span>
+            <span style={{ fontWeight: 800, flexShrink: 0, marginRight: '1.5mm' }}>:</span>
+            <span style={{ fontWeight: 900, fontSize: s(8.5) }}>
+              {`\u20B9 ${price}`}
+            </span>
+          </div>
+        )}
       </div>
 
     </div>
