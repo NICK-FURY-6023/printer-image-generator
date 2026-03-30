@@ -11,6 +11,8 @@ const FIELDS = [
 
 /* ── Jaquar Search helpers ── */
 const PRODUCT_API = '/api/jaquar-product';
+const SEARCH_API = '/api/jaquar-search';
+const LIVE_SEARCH_THRESHOLD = 3; // trigger live search when local results < this
 
 // Product database — lazy-loaded on first search, not at module level
 let _productDB = null;
@@ -57,6 +59,30 @@ function searchLocal(query, db) {
   return results;
 }
 
+// Live search from jaquar.com via backend API
+async function fetchLiveSearch(query) {
+  try {
+    const res = await fetch(`${SEARCH_API}?q=${encodeURIComponent(query)}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data.map(p => ({ ...p, _live: true })) : [];
+  } catch { return []; }
+}
+
+// Merge live results into local results, deduplicating by code
+function mergeResults(localResults, liveResults) {
+  const seen = new Set(localResults.map(p => (p.code || '').toUpperCase().replace(/[-\s]/g, '')));
+  const merged = [...localResults];
+  for (const p of liveResults) {
+    const normCode = (p.code || '').toUpperCase().replace(/[-\s]/g, '');
+    if (!seen.has(normCode)) {
+      seen.add(normCode);
+      merged.push(p);
+    }
+  }
+  return merged;
+}
+
 async function fetchJaquarProduct(url) {
   try {
     const res = await fetch(`${PRODUCT_API}?url=${encodeURIComponent(url)}`);
@@ -75,7 +101,7 @@ function useDebounce(value, delay = 150) {
 }
 
 /* ── Search Dropdown Component ── */
-function JaquarSearchDropdown({ results, loading, onSelect, visible }) {
+function JaquarSearchDropdown({ results, loading, liveLoading, onSelect, visible }) {
   if (!visible) return null;
   return (
     <div style={{
@@ -89,7 +115,7 @@ function JaquarSearchDropdown({ results, loading, onSelect, visible }) {
           <span className="jq-spinner" /> Search ho raha hai...
         </div>
       )}
-      {!loading && results.length === 0 && (
+      {!loading && results.length === 0 && !liveLoading && (
         <div style={{ padding: '10px 12px', fontSize: 11, color: '#475569' }}>
           Koi product nahi mila
         </div>
@@ -108,18 +134,30 @@ function JaquarSearchDropdown({ results, loading, onSelect, visible }) {
             <img src={p.image} alt="" style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 4, background: '#fff', flexShrink: 0 }} />
           )}
           <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#f97316', letterSpacing: '0.02em' }}>{p.code}</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#f97316', letterSpacing: '0.02em', display: 'flex', alignItems: 'center', gap: 6 }}>
+              {p.code}
+              {p._live && (
+                <span style={{ fontSize: 8, color: '#38bdf8', background: 'rgba(56,189,248,0.12)', padding: '1px 5px', borderRadius: 6, fontWeight: 600, letterSpacing: '0.04em' }}>
+                  🌐 LIVE
+                </span>
+              )}
+            </div>
             <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
               {p.name}
             </div>
             {p.price && (
               <div style={{ fontSize: 10, color: '#22c55e', marginTop: 1, fontWeight: 600 }}>
-                MRP ₹{p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                MRP ₹{typeof p.price === 'number' ? p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : p.price}
               </div>
             )}
           </div>
         </button>
       ))}
+      {liveLoading && (
+        <div style={{ padding: '8px 12px', fontSize: 10, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(56,189,248,0.04)' }}>
+          <span className="jq-spinner" /> Jaquar.com se live search ho raha hai...
+        </div>
+      )}
     </div>
   );
 }
@@ -150,6 +188,7 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [liveLoading, setLiveLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [fetchingDetail, setFetchingDetail] = useState(false);
   const [productDB, setProductDB] = useState(_productDB); // sync init if already loaded
@@ -163,31 +202,49 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
   }, []);
 
   // Bug #13 fix: cancelled flag to prevent stale search results
+  // Live fallback: when local results are few, also search jaquar.com
   useEffect(() => {
     let cancelled = false;
+
     if (!debouncedQuery || debouncedQuery.length < 2) {
       setSearchResults([]);
       setSearchLoading(false);
+      setLiveLoading(false);
       setShowDropdown(false);
       return;
     }
+
+    const doSearch = async (db) => {
+      const localResults = searchLocal(debouncedQuery, db);
+      if (cancelled) return;
+      setSearchResults(localResults);
+      setSearchLoading(false);
+      setShowDropdown(true);
+
+      // Live fallback: fetch from jaquar.com if local results are scarce
+      if (localResults.length < LIVE_SEARCH_THRESHOLD && debouncedQuery.length >= 3) {
+        setLiveLoading(true);
+        const liveResults = await fetchLiveSearch(debouncedQuery);
+        if (cancelled) return;
+        if (liveResults.length > 0) {
+          setSearchResults(prev => mergeResults(prev, liveResults));
+        }
+        setLiveLoading(false);
+      }
+    };
+
     if (!productDB) {
       setSearchLoading(true);
       setShowDropdown(true);
       loadProductDB().then(db => {
         if (cancelled) return;
         setProductDB(db);
-        const results = searchLocal(debouncedQuery, db);
-        setSearchResults(results);
-        setSearchLoading(false);
-        setShowDropdown(true);
+        doSearch(db);
       });
-      return () => { cancelled = true; };
+    } else {
+      doSearch(productDB);
     }
-    const results = searchLocal(debouncedQuery, productDB);
-    setSearchResults(results);
-    setSearchLoading(false);
-    setShowDropdown(true);
+
     return () => { cancelled = true; };
   }, [debouncedQuery, productDB]);
 
@@ -232,17 +289,27 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
       productUrl: jaquarUrl,
     };
     if (product.price) {
-      fields.price = product.price.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-      setPriceHint(`✅ Jaquar MRP ₹${product.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (jaquar.com)`);
+      const priceStr = typeof product.price === 'number'
+        ? product.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })
+        : product.price;
+      fields.price = priceStr;
+      setPriceHint(`✅ Jaquar MRP ₹${priceStr} (jaquar.com)`);
     }
     onFillMulti(fields);
 
-    // Only fetch description on-demand (not in local DB)
+    // Fetch full details on-demand (description + price for live results)
     if (product.url) {
       setFetchingDetail(true);
       const detail = await fetchJaquarProduct(product.url).catch(() => null);
-      if (detail && detail.description) {
-        onFillMulti({ description: detail.description });
+      if (detail) {
+        const extras = {};
+        if (detail.description) extras.description = detail.description;
+        // For live results without price, fill price from product page
+        if (!product.price && detail.price) {
+          extras.price = detail.price;
+          setPriceHint(`✅ Jaquar MRP ${detail.price} (jaquar.com — live)`);
+        }
+        if (Object.keys(extras).length) onFillMulti(extras);
       }
       setFetchingDetail(false);
     }
@@ -354,6 +421,7 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
                     <JaquarSearchDropdown
                       results={searchResults}
                       loading={searchLoading}
+                      liveLoading={liveLoading}
                       visible={showDropdown}
                       onSelect={handleProductSelect}
                     />
