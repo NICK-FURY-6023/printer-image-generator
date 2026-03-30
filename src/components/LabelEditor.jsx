@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 const FIELDS = [
   { key: 'manufacturer', label: 'Brand Name',          placeholder: 'e.g. Jaquar',                          span: 2 },
   { key: 'logoUrl',      label: 'Brand Logo URL',      placeholder: 'Paste logo image URL',                 span: 2 },
-  { key: 'code',         label: 'Product Code',        placeholder: 'e.g. ALD-CHR-070N',                    span: 1, searchable: true },
+  { key: 'code',         label: 'Product Code',        placeholder: 'e.g. FUS-CHR-29023B',                   span: 1, searchable: true },
   { key: 'price',        label: 'Product Price (₹)',   placeholder: 'e.g. 3800.00',                         span: 1 },
   { key: 'product',      label: 'Product Name',        placeholder: 'e.g. Concealed Body Diverter',         span: 2, searchable: true },
   { key: 'description',  label: 'Product Description', placeholder: 'e.g. High quality brass body diverter', span: 2 },
@@ -73,10 +73,10 @@ function JaquarSearchDropdown({ results, loading, onSelect, visible }) {
             <img src={p.image} alt="" style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 4, background: '#fff', flexShrink: 0 }} />
           )}
           <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#f1f5f9', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#f97316', letterSpacing: '0.02em' }}>{p.code}</div>
+            <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
               {p.name}
             </div>
-            <div style={{ fontSize: 10, color: '#f97316', marginTop: 1 }}>{p.code}</div>
           </div>
         </button>
       ))}
@@ -110,7 +110,7 @@ function LabelCard({ index, label, onChange, onDuplicateToAll, onReset, isActive
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const debouncedQuery = useDebounce(searchQuery, 500);
+  const debouncedQuery = useDebounce(searchQuery, 300);
   const dropdownRef = useRef(null);
 
   // Trigger search when debounced query changes
