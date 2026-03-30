@@ -819,92 +819,110 @@ export default function Dashboard() {
     <div className="min-h-screen flex flex-col no-print" style={{ background: '#0f172a', color: '#f1f5f9' }}>
       {/* ─── Navbar ─── */}
       <nav style={{ background: 'linear-gradient(135deg,#ea580c 0%,#c2410c 50%,#9a3412 100%)', boxShadow: '0 4px 20px rgba(234,88,12,0.4), 0 8px 32px rgba(0,0,0,0.3)', flexShrink: 0, position: 'relative', zIndex: 10 }}>
-        <div style={{ maxWidth: 1600, margin: '0 auto', padding: '0 16px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        {/* Top bar — Brand + Status + Quick actions */}
+        <div style={{ maxWidth: 1600, margin: '0 auto', padding: '0 16px', height: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           {/* Brand */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-            <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
               </svg>
             </div>
             <div>
-              <div style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.2 }}>Shree Ganpati Agency</div>
-              <div style={{ fontSize: 9, opacity: 0.7, letterSpacing: '0.1em' }}>LABEL PRINT SYSTEM v3</div>
+              <div style={{ fontWeight: 700, fontSize: 13, lineHeight: 1.2 }}>Shree Ganpati Agency</div>
+              <div style={{ fontSize: 8, opacity: 0.7, letterSpacing: '0.1em' }}>LABEL PRINT SYSTEM v3</div>
             </div>
             {currentTemplateName && (
-              <div style={{ marginLeft: 8, padding: '3px 10px', background: 'rgba(255,255,255,0.15)', borderRadius: 20, fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5 }}>
-                <Icon d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <div style={{ marginLeft: 4, padding: '2px 8px', background: 'rgba(255,255,255,0.15)', borderRadius: 20, fontSize: 10, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4, maxWidth: 140, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                <Icon d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" size={10} />
                 {currentTemplateName}
               </div>
             )}
           </div>
 
-          {/* Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-            <div style={{ fontSize: 11, opacity: autoSaved ? 1 : 0, transition: 'opacity 0.3s', color: '#fde68a', display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Icon d="M20 6 9 17l-5-5" sw={2.5} />
+          {/* Right side — Status + Theme + Shortcuts + Logout */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ fontSize: 10, opacity: autoSaved ? 1 : 0, transition: 'opacity 0.3s', color: '#fde68a', display: 'flex', alignItems: 'center', gap: 3 }}>
+              <Icon d="M20 6 9 17l-5-5" sw={2.5} size={11} />
               Saved
             </div>
-            <div style={{ padding: '3px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.15)', fontSize: 11, fontWeight: 600 }}>
+            <div style={{ padding: '2px 8px', borderRadius: 20, background: 'rgba(255,255,255,0.15)', fontSize: 10, fontWeight: 600 }}>
               {totalFilled}/{pages.length * 12}
-              {pages.length > 1 && <span style={{ opacity: 0.7, marginLeft: 4 }}>({pages.length}pg)</span>}
+              {pages.length > 1 && <span style={{ opacity: 0.7, marginLeft: 3 }}>({pages.length}pg)</span>}
             </div>
-
-            <Btn onClick={() => setShowCSVImport(true)} variant="ghost">
-              <Icon d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l5 5v11a2 2 0 0 1-2 2z" />
-              CSV
-            </Btn>
-            <Btn onClick={handleJSONExport} variant="ghost">
-              <Icon d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-4-4 4m0 0-4-4m4 4V4" />
-              JSON
-            </Btn>
-            <Btn onClick={handleCSVExport} variant="ghost">
-              <Icon d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-4-4 4m0 0-4-4m4 4V4" />
-              CSV
-            </Btn>
-            <Btn onClick={handleJSONImport} variant="ghost">
-              <Icon d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-8-4-4m0 0L8 8m4-4v12" />
-              Import
-            </Btn>
-            <Btn onClick={openSave} variant="ghost">
-              <Icon d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-              Save
-            </Btn>
-            <Btn onClick={openLoad} variant="ghost">
-              <Icon d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-              Load
-            </Btn>
-            <Btn onClick={() => setShowHistory(true)} variant="ghost">
-              <Icon d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
-              History
-            </Btn>
-            <Btn onClick={() => setShowTemplatesGallery(true)} variant="ghost">
-              <Icon d="M4 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5zM4 13a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6zM16 13a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-6z" />
-              Templates
-            </Btn>
-            <Btn onClick={handleUndo} variant="ghost" style={{ padding: '7px 8px' }} title="Undo (Ctrl+Z)">
-              <Icon d="M3 10h10a5 5 0 0 1 0 10H9M3 10l4-4M3 10l4 4" />
-            </Btn>
-            <Btn onClick={handleRedo} variant="ghost" style={{ padding: '7px 8px' }} title="Redo (Ctrl+Shift+Z)">
-              <Icon d="M21 10H11a5 5 0 0 0 0 10h4M21 10l-4-4M21 10l-4 4" />
-            </Btn>
-            <Btn onClick={handleReset} variant="danger">
-              <Icon d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-              Reset
-            </Btn>
-            <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.2)' }} />
-            <Btn onClick={toggleTheme} variant="ghost" style={{ padding: '7px 8px' }} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+            <Btn onClick={toggleTheme} variant="ghost" style={{ padding: '5px 6px' }} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
               {theme === 'dark'
                 ? <Icon d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" />
                 : <Icon d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
               }
             </Btn>
-            <Btn onClick={() => setShowShortcuts(true)} variant="ghost" style={{ padding: '7px 8px' }} title="Keyboard shortcuts (?)">
+            <Btn onClick={() => setShowShortcuts(true)} variant="ghost" style={{ padding: '5px 6px' }} title="Keyboard shortcuts (?)">
               <Icon d="M15.2 3H8.8C5.96 3 5 3.96 5 6.8v10.4C5 20.04 5.96 21 8.8 21h6.4c2.84 0 3.8-.96 3.8-3.8V6.8C19 3.96 18.04 3 15.2 3zM11 7.5h2M8 11h8M8 14.5h8" />
             </Btn>
-            <Btn onClick={() => { logout(); toast('Logged out'); navigate('/', { replace: true }); }} variant="ghost" style={{ padding: '7px 10px' }}>
+            <Btn onClick={() => { logout(); toast('Logged out'); navigate('/', { replace: true }); }} variant="ghost" style={{ padding: '5px 8px' }}>
               <Icon d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
-              Logout
+              {!isMobile && 'Logout'}
+            </Btn>
+          </div>
+        </div>
+
+        {/* Toolbar — File actions grouped logically */}
+        <div style={{ background: 'rgba(0,0,0,0.15)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ maxWidth: 1600, margin: '0 auto', padding: '4px 16px', display: 'flex', alignItems: 'center', gap: 4, overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            {/* File group */}
+            <Btn onClick={openSave} variant="ghost" style={{ padding: '4px 10px', fontSize: 11 }}>
+              <Icon d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" size={12} />
+              Save
+            </Btn>
+            <Btn onClick={openLoad} variant="ghost" style={{ padding: '4px 10px', fontSize: 11 }}>
+              <Icon d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" size={12} />
+              Load
+            </Btn>
+            <div style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.12)', flexShrink: 0 }} />
+
+            {/* Import/Export group */}
+            <Btn onClick={() => setShowCSVImport(true)} variant="ghost" style={{ padding: '4px 10px', fontSize: 11 }}>
+              <Icon d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l5 5v11a2 2 0 0 1-2 2z" size={12} />
+              CSV Import
+            </Btn>
+            <Btn onClick={handleCSVExport} variant="ghost" style={{ padding: '4px 10px', fontSize: 11 }}>
+              <Icon d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-4-4 4m0 0-4-4m4 4V4" size={12} />
+              CSV Export
+            </Btn>
+            <Btn onClick={handleJSONExport} variant="ghost" style={{ padding: '4px 10px', fontSize: 11 }}>
+              <Icon d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-4-4 4m0 0-4-4m4 4V4" size={12} />
+              JSON
+            </Btn>
+            <Btn onClick={handleJSONImport} variant="ghost" style={{ padding: '4px 10px', fontSize: 11 }}>
+              <Icon d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-8-4-4m0 0L8 8m4-4v12" size={12} />
+              Import
+            </Btn>
+            <div style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.12)', flexShrink: 0 }} />
+
+            {/* Tools group */}
+            <Btn onClick={() => setShowHistory(true)} variant="ghost" style={{ padding: '4px 10px', fontSize: 11 }}>
+              <Icon d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" size={12} />
+              History
+            </Btn>
+            <Btn onClick={() => setShowTemplatesGallery(true)} variant="ghost" style={{ padding: '4px 10px', fontSize: 11 }}>
+              <Icon d="M4 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5zM4 13a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6zM16 13a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-6z" size={12} />
+              Templates
+            </Btn>
+            <div style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.12)', flexShrink: 0 }} />
+
+            {/* Edit group */}
+            <Btn onClick={handleUndo} variant="ghost" style={{ padding: '4px 7px' }} title="Undo (Ctrl+Z)">
+              <Icon d="M3 10h10a5 5 0 0 1 0 10H9M3 10l4-4M3 10l4 4" size={12} />
+            </Btn>
+            <Btn onClick={handleRedo} variant="ghost" style={{ padding: '4px 7px' }} title="Redo (Ctrl+Shift+Z)">
+              <Icon d="M21 10H11a5 5 0 0 0 0 10h4M21 10l-4-4M21 10l-4 4" size={12} />
+            </Btn>
+            <div style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.12)', flexShrink: 0 }} />
+
+            {/* Danger zone */}
+            <Btn onClick={handleReset} variant="danger" style={{ padding: '4px 10px', fontSize: 11 }}>
+              <Icon d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" size={12} />
+              Reset
             </Btn>
           </div>
         </div>
