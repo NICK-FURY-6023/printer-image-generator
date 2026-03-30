@@ -2,14 +2,34 @@
 
 /* ─── Print CSS ─────────────────────────────────────── */
 @media print {
-  /* Hide everything except label sheets */
-  body > *:not(.print-root) { display: none !important; }
+  /* Hide everything via visibility (display:none kills nested .print-root) */
+  body * { visibility: hidden !important; }
   .no-print { display: none !important; }
 
-  /* The preview wrapper must be visible and unstyled */
-  .print-root,
-  .print-root * {
+  /* Pull .print-root out of flow and make it visible */
+  .print-root {
     visibility: visible !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 210mm !important;
+    height: auto !important;
+    z-index: 99999 !important;
+    display: block !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+  }
+  .print-root * { visibility: visible !important; }
+
+  /* Remove the preview scale wrapper chrome */
+  .print-preview-frame {
+    width: 210mm !important;
+    height: auto !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
   }
   .print-scale-wrapper {
     transform: none !important;
@@ -24,33 +44,32 @@
     transform: none !important;
     page-break-after: always;
   }
-  /* Prevent strikethrough lines on text */
-  .print-sheet * {
-    text-decoration: none !important;
-  }
-  /* Ensure images print with colors */
+  .print-sheet * { text-decoration: none !important; }
   .print-sheet img {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     display: inline-block !important;
     visibility: visible !important;
   }
-  .print-copies-container { display: block !important; }
+  .print-copies-container {
+    display: block !important;
+    visibility: visible !important;
+  }
   @page { size: A4; margin: 0; }
 }
 
-/* ─── Sheet grid — OUTSIDE @layer so it can't be overridden ── */
+/* ─── Sheet grid — exact 105×48mm labels, 2×6 on A4 ── */
 .sheet {
   width: 210mm !important;
   height: 297mm !important;
   display: grid !important;
-  grid-template-columns: repeat(2, 1fr) !important;
-  grid-template-rows: repeat(6, 1fr) !important;
-  padding: 7mm 3.5mm !important;
+  grid-template-columns: repeat(2, 105mm) !important;
+  grid-template-rows: repeat(6, 48mm) !important;
+  padding: 4.5mm 0mm !important;
   margin: 0 !important;
   background: white !important;
   box-sizing: border-box !important;
-  gap: 1mm !important;
+  gap: 0mm !important;
 }
 
 /* ─── Theme variables ─────────────────────────────── */

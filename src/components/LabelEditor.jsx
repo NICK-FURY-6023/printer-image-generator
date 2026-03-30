@@ -149,36 +149,41 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
   const [searchLoading, setSearchLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [fetchingDetail, setFetchingDetail] = useState(false);
-  const [productDB, setProductDB] = useState(null);
+  const [productDB, setProductDB] = useState(_productDB); // sync init if already loaded
   const debouncedQuery = useDebounce(searchQuery, 150);
   const wrapperRef = useRef(null);
 
-  // Preload product database on first mount
-  useEffect(() => { loadProductDB().then(setProductDB); }, []);
+  // Ensure product database is loaded
+  useEffect(() => {
+    if (_productDB) { setProductDB(_productDB); return; }
+    loadProductDB().then(db => setProductDB(db));
+  }, []);
 
   // Instant local search when query changes
   useEffect(() => {
     if (!debouncedQuery || debouncedQuery.length < 2) {
       setSearchResults([]);
       setSearchLoading(false);
+      setShowDropdown(false);
       return;
     }
     if (!productDB) {
-      // DB still loading — wait for it then search
+      // DB still loading — show spinner
       setSearchLoading(true);
+      setShowDropdown(true);
       loadProductDB().then(db => {
         setProductDB(db);
         const results = searchLocal(debouncedQuery, db);
         setSearchResults(results);
         setSearchLoading(false);
-        setShowDropdown(results.length > 0);
+        setShowDropdown(true);
       });
       return;
     }
     const results = searchLocal(debouncedQuery, productDB);
     setSearchResults(results);
     setSearchLoading(false);
-    setShowDropdown(results.length > 0);
+    setShowDropdown(true);
   }, [debouncedQuery, productDB]);
 
   // Close dropdown on outside click
@@ -197,8 +202,14 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
     onChange(key, value);
     setSearchField(key);
     setSearchQuery(value);
-    if (value.length >= 2) setSearchLoading(true);
-    else { setShowDropdown(false); setSearchResults([]); }
+    if (value.length >= 2) {
+      setSearchLoading(true);
+      setShowDropdown(true);
+    } else {
+      setShowDropdown(false);
+      setSearchResults([]);
+      setSearchLoading(false);
+    }
   };
 
   const handleProductSelect = async (product) => {
