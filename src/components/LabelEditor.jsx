@@ -285,11 +285,12 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
     // Build product URL for Jaquar website
     const jaquarUrl = product.url ? `https://www.jaquar.com${product.url}` : '';
 
-    // Fill ALL fields instantly from local DB (code, name, price)
+    // Fill ALL fields instantly from local DB (code, name, price, image)
     const fields = {
       code: product.code || '',
       product: product.name || '',
       productUrl: jaquarUrl,
+      productImage: product.image || '',
     };
     if (product.price) {
       const priceStr = typeof product.price === 'number'
@@ -307,6 +308,7 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
       if (detail) {
         const extras = {};
         if (detail.description) extras.description = detail.description;
+        if (detail.image) extras.productImage = detail.image;
         // For live results without price, fill price from product page
         if (!product.price && detail.price) {
           extras.price = detail.price;
