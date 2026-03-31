@@ -180,6 +180,7 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
                 textTransform: 'uppercase', lineHeight: 1.3,
                 display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
                 overflow: 'hidden', wordBreak: 'break-word',
+                maxHeight: `${4.5 * fontScale * 2 * 1.3}pt`,
               }}>
                 {product}
               </div>
@@ -188,9 +189,10 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
               <div style={{
                 fontSize: s(3.5), fontWeight: 600,
                 lineHeight: 1.3, textTransform: 'uppercase',
-                display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical',
+                display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
                 overflow: 'hidden', wordBreak: 'break-word',
                 marginTop: product ? '0.5mm' : 0,
+                maxHeight: `${3.5 * fontScale * 3 * 1.3}pt`,
               }}>
                 {description || ''}
               </div>
