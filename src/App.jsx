@@ -5,9 +5,25 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import { lazy, Suspense } from 'react';
 
-const Landing = lazy(() => import('./components/Landing'));
-const Login = lazy(() => import('./components/Login'));
-const Dashboard = lazy(() => import('./components/Dashboard'));
+// Auto-reload on stale chunk (after redeployment, old hashed filenames 404)
+function lazyRetry(importFn) {
+  return lazy(() =>
+    importFn().catch(() => {
+      const reloaded = sessionStorage.getItem('chunk_reload');
+      if (!reloaded) {
+        sessionStorage.setItem('chunk_reload', '1');
+        window.location.reload();
+        return new Promise(() => {}); // never resolves — page is reloading
+      }
+      sessionStorage.removeItem('chunk_reload');
+      return importFn(); // second attempt, throw if still fails
+    })
+  );
+}
+
+const Landing = lazyRetry(() => import('./components/Landing'));
+const Login = lazyRetry(() => import('./components/Login'));
+const Dashboard = lazyRetry(() => import('./components/Dashboard'));
 
 function ProtectedApp() {
   const { user, loading } = useAuth();
