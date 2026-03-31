@@ -1,16 +1,17 @@
 /*
  * Hardware product label — 105mm × 48mm (Jaquar-type packaging sticker)
- * ┌───┬──────────────────────────────────────────┐
- * │   │ [LOGO]                      [QR]         │
- * │ M │──────────────────────────────────────────│
- * │ O │ │ Size │ Qty │ MRP (Per Piece) │        │
- * │ D │ │ 15mm │  1  │   ₹3,800.00    │        │
- * │ E │──────────────────────────────────────────│
- * │ L │ Product Name       │ [PRODUCT IMAGE]    │
- * │   │ Description text   │                    │
- * │   │──────────────────────────────────────────│
- * │   │ Jaquar & Co. Pvt. Ltd.  |  Made in India│
- * └───┴──────────────────────────────────────────┘
+ * ┌════╦══════════════════════════════════════════┐
+ * ║    ║ [LOGO] [QR]                              ║
+ * ║ M  ║──────────────────────────────────────────║
+ * ║ O  ║ │ Size │ Qty │ MRP (Per Piece)  │        ║
+ * ║ D  ║ │ 15mm │  1  │ ₹3,800 (incl.)  │        ║
+ * ║ E  ║──────────────────────────────────────────║
+ * ║ L  ║ Product Name       │ [PRODUCT IMAGE]    ║
+ * ║    ║ Description text   │                    ║
+ * ║    ║──────────────────────────────────────────║
+ * ║    ║ Jaquar & Co. Pvt. Ltd.    Made in India  ║
+ * ║    ║ Mth/Yr: 03/2026  Customer Care: 1800... ║
+ * └════╩══════════════════════════════════════════┘
  */
 
 import { useState, useEffect, memo } from 'react';
@@ -52,7 +53,7 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
     : productImage;
   const qrDataUrl = useQRCode(productUrl);
   const s = (pt) => `${pt * fontScale}pt`;
-  const B = '0.18mm solid #000';
+  const B = '0.35mm solid #000';
   const BT = '0.12mm solid #000';
   const [logoError, setLogoError] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -213,15 +214,20 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
           )}
         </div>
 
-        {/* ── FOOTER — Company name + Made in India (normal weight) ── */}
+        {/* ── FOOTER — Two lines: Company/India + Mfg date/Customer Care ── */}
         <div style={{
-          flexShrink: 0, padding: '0.4mm 1mm 0.3mm',
-          fontSize: s(3.5), lineHeight: 1.3, color: '#000',
+          flexShrink: 0, padding: '0.3mm 1mm',
+          fontSize: s(3.2), lineHeight: 1.25, color: '#000',
           fontWeight: 400, borderTop: BT,
-          display: 'flex', justifyContent: 'space-between',
         }}>
-          <span>Jaquar & Co. Pvt. Ltd.</span>
-          <span>Made in India</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span>Jaquar & Co. Pvt. Ltd.</span>
+            <span>Made in India</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: s(2.8), color: '#333' }}>
+            <span>Mth/Yr of Mfg: ___/____</span>
+            <span>Customer Care: 1800-102-9900</span>
+          </div>
         </div>
 
       </div>

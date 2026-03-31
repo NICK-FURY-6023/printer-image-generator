@@ -161,9 +161,9 @@ export default function LabelPreview({
           const cx = PX + col * (CW + GAP);
           const cy = PY_TOP + row * (CH + GAP);
 
-          // Cell border
+          // Cell border (thicker for premium look)
           pdf.setDrawColor(0, 0, 0);
-          pdf.setLineWidth(0.18);
+          pdf.setLineWidth(0.35);
           pdf.rect(cx, cy, CW, CH);
 
           // ── LEFT VERTICAL STRIP — black with white rotated model number ──
@@ -277,7 +277,7 @@ export default function LabelPreview({
           const desc = label.description?.trim() || '';
           const prodImgUrl = label.productImage?.trim() || '';
           const prodImg = prodImgUrl ? prodImgCache[prodImgUrl] : null;
-          const footerY = cy + CH - 3.5;
+          const footerY = cy + CH - 5;
           const midAvailH = footerY - curY - 0.6;
 
           // Product image on right side
@@ -316,13 +316,23 @@ export default function LabelPreview({
             pdf.text(descLines, contentX + 0.5, textY + 1, { lineHeightFactor: 1.25 });
           }
 
-          // ── FOOTER — Jaquar & Co. Pvt. Ltd. + Made in India (normal weight) ──
+          // ── FOOTER — Two lines: Company/India + Mfg date/Customer Care ──
+          const footerTop = cy + CH - 5;
           pdf.setLineWidth(0.1);
-          pdf.line(cx + STRIP_W, footerY - 0.3, cx + CW, footerY - 0.3);
-          pdf.setFontSize(s(3.2));
+          pdf.line(cx + STRIP_W, footerTop, cx + CW, footerTop);
+
+          // Line 1: Company + Made in India
+          pdf.setFontSize(s(3));
           pdf.setFont('helvetica', 'normal');
-          pdf.text('Jaquar & Co. Pvt. Ltd.', contentX, footerY + 0.8);
-          pdf.text('Made in India', contentX + contentW, footerY + 0.8, { align: 'right' });
+          pdf.text('Jaquar & Co. Pvt. Ltd.', contentX, footerTop + 1.5);
+          pdf.text('Made in India', contentX + contentW, footerTop + 1.5, { align: 'right' });
+
+          // Line 2: Mfg date + Customer Care
+          pdf.setFontSize(s(2.5));
+          pdf.setTextColor(50, 50, 50);
+          pdf.text('Mth/Yr of Mfg: ___/____', contentX, footerTop + 3.5);
+          pdf.text('Customer Care: 1800-102-9900', contentX + contentW, footerTop + 3.5, { align: 'right' });
+          pdf.setTextColor(0, 0, 0);
         }
         } // end pageIdx loop
       }
