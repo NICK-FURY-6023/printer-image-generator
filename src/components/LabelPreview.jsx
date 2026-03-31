@@ -193,14 +193,14 @@ export default function LabelPreview({
             }
           }
 
-          // QR code on right
+          // QR code on right — padded inward to avoid print-cutoff
           const pUrl = label.productUrl?.trim();
           const qrData = pUrl ? qrCache[pUrl] : null;
           if (qrData) {
             const qrSize = TOP_H - 1.5;
             try {
               pdf.addImage(qrData, 'PNG',
-                contentX + contentW - qrSize, curY + 0.5, qrSize, qrSize);
+                contentX + contentW - qrSize - 1.5, curY + 0.5, qrSize, qrSize);
             } catch { /* skip */ }
           }
 
@@ -277,15 +277,15 @@ export default function LabelPreview({
             curY += Math.max(descBlockH, availH) + 0.3;
           }
 
-          // ── FOOTER — Mfg by + Address ──
-          const footerY = cy + CH - 3;
+          // ── FOOTER — Manufactured by + Address (bold) ──
+          const footerY = cy + CH - 3.5;
           pdf.setLineWidth(0.1);
           pdf.line(cx + STRIP_W, footerY - 0.3, cx + CW, footerY - 0.3);
-          pdf.setFontSize(s(3));
-          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(s(3.2));
+          pdf.setFont('helvetica', 'bold');
           const brand = label.manufacturer?.trim();
           if (brand) {
-            pdf.text(`Mfg by: ${brand}`, contentX, footerY + 0.8);
+            pdf.text(`Manufactured by: ${brand}`, contentX, footerY + 0.8);
           }
           pdf.text('Address: India', contentX, footerY + 2.3);
         }

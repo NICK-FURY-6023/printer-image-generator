@@ -103,7 +103,7 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
                 style={{
                   maxHeight: '7mm', maxWidth: '22mm',
                   objectFit: 'contain',
-                  filter: 'grayscale(100%) contrast(1.5)',
+                  filter: 'grayscale(100%) contrast(3) brightness(0.1)',
                 }} />
             ) : (
               <span style={{
@@ -115,11 +115,12 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
             )}
           </div>
 
-          {/* QR Code */}
+          {/* QR Code — padded right to avoid print-cutoff */}
           {qrDataUrl && (
             <img src={qrDataUrl} alt="QR" style={{
               width: '7mm', height: '7mm',
               objectFit: 'contain', flexShrink: 0,
+              marginRight: '1.5mm',
             }} />
           )}
         </div>
@@ -192,13 +193,14 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
 
         {/* ── FOOTER — Manufacturer + Address ── */}
         <div style={{
-          flexShrink: 0, padding: '0.3mm 1mm',
-          fontSize: s(3.2), lineHeight: 1.2, color: '#000',
+          flexShrink: 0, padding: '0.4mm 1mm 0.3mm',
+          fontSize: s(3.5), lineHeight: 1.3, color: '#000',
+          fontWeight: 700, borderTop: BT,
         }}>
           {brand && (
-            <span style={{ display: 'block' }}><strong>Mfg by:</strong> {brand}</span>
+            <span style={{ display: 'block' }}>Manufactured by: {brand}</span>
           )}
-          <span style={{ display: 'block' }}><strong>Address:</strong> India</span>
+          <span style={{ display: 'block' }}>Address: India</span>
         </div>
 
       </div>
