@@ -1,7 +1,8 @@
 /**
  * Wrapper for dynamic import() that handles stale chunk errors.
  * After a Vercel redeployment, cached HTML may reference old hashed filenames
- * that no longer exist. This retries once after a page reload.
+ * that no longer exist. This forces a cache-busting page reload to fetch
+ * the latest index.html with correct chunk references.
  */
 export async function dynamicImport(importFn) {
   try {
@@ -15,7 +16,10 @@ export async function dynamicImport(importFn) {
     const key = 'chunk_reload';
     if (!sessionStorage.getItem(key)) {
       sessionStorage.setItem(key, '1');
-      window.location.reload();
+      // Cache-busting reload: add timestamp to force fresh HTML fetch
+      const url = new URL(window.location.href);
+      url.searchParams.set('_cb', Date.now());
+      window.location.replace(url.toString());
       return new Promise(() => {}); // never resolves — page is reloading
     }
     sessionStorage.removeItem(key);
