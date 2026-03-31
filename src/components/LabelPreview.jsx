@@ -185,7 +185,9 @@ export default function LabelPreview({
             while (pdf.getTextWidth(codeText) > maxCodeW && codeText.length > 3) {
               codeText = codeText.slice(0, -1);
             }
-            pdf.text(codeText, cx + STRIP_W / 2, cy + CH / 2, { angle: 90, align: 'center' });
+            // Manual centering — align:'center' doesn't work reliably with angle
+            const tw = pdf.getTextWidth(codeText);
+            pdf.text(codeText, cx + STRIP_W / 2, cy + (CH + tw) / 2, { angle: 90 });
           }
 
           // Content area after the strip
