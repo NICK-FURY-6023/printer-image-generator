@@ -184,7 +184,7 @@ const LabelCell = memo(function LabelCell({ label }) {
         </span>
       </div>
 
-      {/* ── MAIN CONTENT — Flexbox column (html2canvas lacks grid-template support) ── */}
+      {/* ── MAIN CONTENT — Flexbox column layout ── */}
       <div style={{
         flex: '1 1 auto',
         display: 'flex', flexDirection: 'column',

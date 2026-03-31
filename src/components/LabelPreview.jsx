@@ -75,7 +75,7 @@ export default function LabelPreview({
     const tid = toast.loading('Generating PDF…');
     try {
       const { default: jsPDF } = await dynamicImport(() => import('jspdf'));
-      const { default: html2canvas } = await dynamicImport(() => import('html2canvas'));
+      const { toCanvas } = await dynamicImport(() => import('html-to-image'));
 
       const pdf = new jsPDF({ format: 'a4', unit: 'mm', orientation: 'portrait', compress: true });
 
@@ -83,7 +83,7 @@ export default function LabelPreview({
       const printRoot = document.querySelector('.print-root');
       if (!printRoot) throw new Error('Print root not found');
 
-      // Make print-root visible off-screen so images load and elements render
+      // Make print-root visible on-screen so browser can compute styles
       const origDisplay = printRoot.style.display;
       printRoot.style.display = 'block';
       printRoot.style.position = 'absolute';
@@ -99,8 +99,8 @@ export default function LabelPreview({
       await Promise.all(Array.from(imgs).map(img =>
         img.complete ? Promise.resolve() : new Promise(r => { img.onload = r; img.onerror = r; })
       ));
-      // Small delay to ensure browser paints the elements
-      await new Promise(r => setTimeout(r, 100));
+      // Let browser paint elements fully
+      await new Promise(r => setTimeout(r, 200));
 
       const sheets = printRoot.querySelectorAll('.print-sheet');
       if (!sheets.length) throw new Error('No label sheets found');
@@ -110,15 +110,12 @@ export default function LabelPreview({
         if (!isFirstPage) pdf.addPage();
         isFirstPage = false;
 
-        // Capture at 3x scale for ~300 DPI print quality
-        const canvas = await html2canvas(sheet, {
-          scale: 3,
-          useCORS: true,
-          allowTaint: false,
+        // html-to-image uses browser's own rendering engine (SVG foreignObject)
+        // — supports CSS Grid, flexbox, all properties natively
+        const canvas = await toCanvas(sheet, {
+          pixelRatio: 3,
           backgroundColor: '#ffffff',
-          logging: false,
-          windowWidth: sheet.scrollWidth,
-          windowHeight: sheet.scrollHeight,
+          cacheBust: true,
         });
 
         const imgData = canvas.toDataURL('image/jpeg', 0.95);
@@ -202,13 +199,13 @@ export default function LabelPreview({
         <ToolBtn onClick={async () => {
           const tid = toast.loading('Generating PNG…');
           try {
-            const { default: html2canvas } = await dynamicImport(() => import('html2canvas'));
+            const { toPng } = await dynamicImport(() => import('html-to-image'));
             const sheet = containerRef.current?.querySelector('.print-scale-wrapper');
             if (!sheet) throw new Error('Preview not found');
-            const canvas = await html2canvas(sheet, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+            const dataUrl = await toPng(sheet, { pixelRatio: 2, backgroundColor: '#ffffff', cacheBust: true });
             const link = document.createElement('a');
             link.download = `ganpati-labels-${Date.now()}.png`;
-            link.href = canvas.toDataURL('image/png');
+            link.href = dataUrl;
             link.click();
             toast.success('PNG downloaded!', { id: tid });
           } catch (err) { toast.error(`PNG failed: ${err?.message || 'Error'}`, { id: tid }); }
@@ -221,15 +218,12 @@ export default function LabelPreview({
         <ToolBtn onClick={async () => {
           const tid = toast.loading('Generating SVG…');
           try {
-            const { default: html2canvas } = await dynamicImport(() => import('html2canvas'));
+            const { toSvg } = await dynamicImport(() => import('html-to-image'));
             const sheet = containerRef.current?.querySelector('.print-scale-wrapper');
             if (!sheet) throw new Error('Preview not found');
-            const canvas = await html2canvas(sheet, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-            const dataUrl = canvas.toDataURL('image/png');
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width}" height="${canvas.height}">
-              <image href="${dataUrl}" width="${canvas.width}" height="${canvas.height}"/>
-            </svg>`;
-            const blob = new Blob([svg], { type: 'image/svg+xml' });
+            const dataUrl = await toSvg(sheet, { backgroundColor: '#ffffff', cacheBust: true });
+            const svgText = decodeURIComponent(dataUrl.split(',')[1]);
+            const blob = new Blob([svgText], { type: 'image/svg+xml' });
             const link = document.createElement('a');
             link.download = `ganpati-labels-${Date.now()}.svg`;
             link.href = URL.createObjectURL(blob);
