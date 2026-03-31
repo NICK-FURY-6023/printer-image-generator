@@ -90,13 +90,21 @@ export default function LabelPreview({
       const s = (pt) => pt * fontScale;
       const PT2MM = 0.3528;
 
-      // ── Pre-load images ──
+      // ── Pre-load images (proxy external URLs for CORS) ──
+      function proxyUrl(url) {
+        if (!url) return url;
+        if (url.startsWith('https://www.jaquar.com/')) {
+          return `/api/image-proxy?url=${encodeURIComponent(url)}`;
+        }
+        return url;
+      }
+
       async function loadImg(url) {
         if (!url) return null;
         try {
           const img = new Image();
           img.crossOrigin = 'anonymous';
-          img.src = url;
+          img.src = proxyUrl(url);
           await new Promise((r, e) => { img.onload = r; img.onerror = e; });
           const c = document.createElement('canvas');
           c.width = img.naturalWidth; c.height = img.naturalHeight;

@@ -46,6 +46,10 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
   const logoUrl = label.logoUrl?.trim() || '/jaquar-logo.png';
   const productUrl = label.productUrl?.trim() || '';
   const productImage = label.productImage?.trim() || '';
+  // Proxy jaquar.com images to avoid CORS/referrer blocking
+  const productImageSrc = productImage.startsWith('https://www.jaquar.com/')
+    ? `/api/image-proxy?url=${encodeURIComponent(productImage)}`
+    : productImage;
   const qrDataUrl = useQRCode(productUrl);
   const s = (pt) => `${pt * fontScale}pt`;
   const B = '0.18mm solid #000';
@@ -197,7 +201,7 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
               justifyContent: 'center', padding: '0.5mm',
               borderLeft: BT, width: '14mm',
             }}>
-              <img src={productImage} alt="Product" crossOrigin="anonymous"
+              <img src={productImageSrc} alt="Product"
                 onError={() => setImgError(true)}
                 style={{
                   maxHeight: '100%', maxWidth: '13mm',
