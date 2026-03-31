@@ -230,10 +230,13 @@ export default function LabelPreview({
           const tblW = contentW;
           const col1W = tblW * 0.28, col2W = tblW * 0.22, col3W = tblW * 0.50;
 
-          // Header row (black bg)
-          pdf.setFillColor(0, 0, 0);
-          pdf.rect(tblX, curY, tblW, TABLE_H / 2, 'F');
-          pdf.setTextColor(255, 255, 255);
+          // Header row (white bg, bordered)
+          pdf.setDrawColor(0);
+          pdf.setLineWidth(0.12);
+          pdf.rect(tblX, curY, tblW, TABLE_H / 2);
+          pdf.line(tblX + col1W, curY, tblX + col1W, curY + TABLE_H / 2);
+          pdf.line(tblX + col1W + col2W, curY, tblX + col1W + col2W, curY + TABLE_H / 2);
+          pdf.setTextColor(0, 0, 0);
           pdf.setFontSize(s(4));
           pdf.setFont('helvetica', 'bold');
           pdf.text('Size', tblX + col1W / 2, curY + TABLE_H / 4 + 0.3, { align: 'center' });
