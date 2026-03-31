@@ -215,7 +215,7 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
           )}
         </div>
 
-        {/* ── FOOTER — Two lines: Company/India + Mfg date/Customer Care ── */}
+        {/* ── FOOTER — 3 lines: Company/India, Mfg date/Email, Phone ── */}
         <div style={{
           flexShrink: 0, padding: '0.3mm 1mm',
           fontSize: s(3.2), lineHeight: 1.25, color: '#000',
@@ -227,7 +227,15 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: s(2.8), color: '#333' }}>
             <span>Mth/Yr of Mfg: {mfgDate || '___/____'}</span>
-            <span>Customer Care: 1800-102-9900</span>
+            <span>service@jaquar.com</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: s(2.8), color: '#333' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3mm' }}>
+              <svg width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle' }}>
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.13.81.36 1.6.68 2.35a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.75.32 1.54.55 2.35.68A2 2 0 0122 16.92z"/>
+              </svg>
+              1800-102-9900
+            </span>
           </div>
         </div>
 

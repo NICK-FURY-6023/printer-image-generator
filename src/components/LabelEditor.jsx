@@ -142,7 +142,7 @@ function JaquarSearchDropdown({ results, loading, liveLoading, onSelect, visible
               {p.code}
               {p._live && (
                 <span style={{ fontSize: 8, color: '#38bdf8', background: 'rgba(56,189,248,0.12)', padding: '1px 5px', borderRadius: 6, fontWeight: 600, letterSpacing: '0.04em' }}>
-                  🌐 LIVE
+                  LIVE
                 </span>
               )}
             </div>
@@ -305,7 +305,7 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
         ? product.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })
         : product.price;
       fields.price = priceStr;
-      setPriceHint(`✅ Jaquar MRP ₹${priceStr} (jaquar.com)`);
+      setPriceHint(`Jaquar MRP ₹${priceStr} (jaquar.com)`);
     }
     onFillMulti(fields);
 
@@ -320,7 +320,7 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
         // For live results without price, fill price from product page
         if (!product.price && detail.price) {
           extras.price = detail.price;
-          setPriceHint(`✅ Jaquar MRP ${detail.price} (jaquar.com — live)`);
+          setPriceHint(`Jaquar MRP ${detail.price} (jaquar.com — live)`);
         }
         if (Object.keys(extras).length) onFillMulti(extras);
       }
@@ -397,7 +397,7 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
                 <div style={{ gridColumn: span === 2 ? '1 / -1' : undefined, position: 'relative' }}>
                   <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#64748b', marginBottom: 4, letterSpacing: '0.05em' }}>
                     {fl}
-                    {searchable && <span style={{ color: '#f97316', fontSize: 9, marginLeft: 4 }}>🔍 Jaquar</span>}
+                    {searchable && <span style={{ color: '#f97316', fontSize: 9, marginLeft: 4 }}>Jaquar</span>}
                   </label>
                   <input
                     type="text"

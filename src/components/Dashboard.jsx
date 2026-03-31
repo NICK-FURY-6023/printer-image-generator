@@ -283,8 +283,8 @@ function HistoryModal({ onClose, onRestore }) {
                     {h.filledCount}/{(h.pageCount || 1) * 12} labels{h.pageCount > 1 ? ` · ${h.pageCount} pages` : ''}{h.copies > 1 ? ` · ${h.copies} copies` : ''}
                   </div>
                   <div style={{ fontSize: 10, color: '#475569', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span>📅 {fmtDate(h.time)}</span>
-                    <span>🕐 {fmtTime(h.time)}</span>
+                    <span>{fmtDate(h.time)}</span>
+                    <span>{fmtTime(h.time)}</span>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
@@ -373,7 +373,7 @@ function ShortcutsModal({ onClose }) {
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 16, width: '100%', maxWidth: 420, padding: 28 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h2 style={{ fontSize: 17, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>⌨️ Keyboard Shortcuts</h2>
+          <h2 style={{ fontSize: 17, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>Keyboard Shortcuts</h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 20 }}>×</button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -440,7 +440,7 @@ function TemplatesGallery({ onApply, onClose }) {
       <div style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 16, width: '100%', maxWidth: 560, maxHeight: '85vh', overflow: 'auto', padding: 28 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <div>
-            <h2 style={{ fontSize: 17, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>📋 Label Templates</h2>
+            <h2 style={{ fontSize: 17, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>Label Templates</h2>
             <p style={{ fontSize: 12, color: '#64748b', margin: '4px 0 0' }}>Quick-start with pre-filled label data</p>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 20 }}>×</button>
@@ -528,23 +528,23 @@ export default function Dashboard() {
   }, []);
 
   const handleUndo = useCallback(() => {
-    if (!undoStack.current.length) { toast('Nothing to undo', { icon: '↩️' }); return; }
+    if (!undoStack.current.length) { toast('Nothing to undo'); return; }
     const prev = undoStack.current.pop();
     redoStack.current.push(JSON.stringify(pages));
     skipHistory.current = true;
     setPages(JSON.parse(prev));
     skipHistory.current = false;
-    toast('Undo', { icon: '↩️', duration: 1000 });
+    toast('Undo', { duration: 1000 });
   }, [pages]);
 
   const handleRedo = useCallback(() => {
-    if (!redoStack.current.length) { toast('Nothing to redo', { icon: '↪️' }); return; }
+    if (!redoStack.current.length) { toast('Nothing to redo'); return; }
     const next = redoStack.current.pop();
     undoStack.current.push(JSON.stringify(pages));
     skipHistory.current = true;
     setPages(JSON.parse(next));
     skipHistory.current = false;
-    toast('Redo', { icon: '↪️', duration: 1000 });
+    toast('Redo', { duration: 1000 });
   }, [pages]);
 
   // Current page's labels (derived)
@@ -666,7 +666,7 @@ export default function Dashboard() {
             );
             if (loaded.some(p => p.some(l => l.product?.trim() || l.code?.trim()))) {
               setPages(loaded);
-              toast.success('☁️ Loaded draft from cloud');
+              toast.success('Loaded draft from cloud');
             }
           }
         }
@@ -681,7 +681,7 @@ export default function Dashboard() {
         filter: 'name=eq.__auto_draft__',
       }, (payload) => {
         if (payload.new?.id && payload.new.id !== cloudDraftId.current) {
-          toast('📱 Draft updated from another device — open Load to restore', { icon: '☁️', duration: 5000 });
+          toast('Draft updated from another device — open Load to restore', { duration: 5000 });
         }
       })
       .subscribe();
@@ -1102,7 +1102,7 @@ export default function Dashboard() {
               color: mobileTab === tab ? '#f97316' : '#64748b',
               transition: 'all 0.15s', textTransform: 'uppercase', letterSpacing: '0.05em',
             }}>
-              {tab === 'editor' ? '✏️ Editor' : '👁️ Preview'}
+              {tab === 'editor' ? 'Editor' : 'Preview'}
             </button>
           ))}
         </div>

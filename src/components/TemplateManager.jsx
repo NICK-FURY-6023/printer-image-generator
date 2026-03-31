@@ -80,7 +80,7 @@ export default function TemplateManager({ mode, labels, onLoad, onClose }) {
       setNewName('');
       setSaving(false);
       toast.success(idx >= 0 ? `Updated "${name}" (local)` : `Saved "${name}" (local)`);
-      if (!token) toast('Login to sync templates to cloud', { icon: '☁️', duration: 4000 });
+      if (!token) toast('Login to sync templates to cloud', { duration: 4000 });
       return;
     }
 
@@ -88,10 +88,10 @@ export default function TemplateManager({ mode, labels, onLoad, onClose }) {
       const existing = templates.find(t => t.name === name);
       if (existing) {
         await updateTemplate(existing.id, name, labels);
-        toast.success(`Updated "${name}" ☁️`);
+        toast.success(`Updated "${name}"`);
       } else {
         await createTemplate(name, labels);
-        toast.success(`Saved "${name}" ☁️`);
+        toast.success(`Saved "${name}"`);
       }
       await loadTemplates();
       setNewName('');
@@ -122,14 +122,14 @@ export default function TemplateManager({ mode, labels, onLoad, onClose }) {
       saveLocalTemplates(updated);
       setTemplates(updated);
       setDeletingId(null);
-      toast('Template deleted', { icon: '🗑️' });
+      toast('Template deleted');
       return;
     }
 
     try {
       await deleteTemplate(id);
       setTemplates(ts => ts.filter(t => t.id !== id));
-      toast('Template deleted', { icon: '🗑️' });
+      toast('Template deleted');
     } catch {
       toast.error('Failed to delete.');
     } finally {
@@ -155,14 +155,14 @@ export default function TemplateManager({ mode, labels, onLoad, onClose }) {
         }}>
           <div>
             <h2 style={{ fontSize: 15, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>
-              {mode === 'save' ? '💾 Save Template' : '📂 Load Template'}
+              {mode === 'save' ? 'Save Template' : 'Load Template'}
             </h2>
             <p style={{ fontSize: 11, color: '#475569', margin: '2px 0 0', display: 'flex', alignItems: 'center', gap: 6 }}>
               {templates.length} template{templates.length !== 1 ? 's' : ''} saved
               {isLocal ? (
-                <span style={{ color: '#f59e0b' }}>📁 Local</span>
+                <span style={{ color: '#f59e0b' }}>Local</span>
               ) : (
-                <span style={{ color: '#22c55e' }}>☁️ Cloud synced</span>
+                <span style={{ color: '#22c55e' }}>Cloud synced</span>
               )}
             </p>
           </div>
@@ -212,12 +212,12 @@ export default function TemplateManager({ mode, labels, onLoad, onClose }) {
 
           {loading ? (
             <div style={{ textAlign: 'center', padding: '32px 0', color: '#475569' }}>
-              <div className="animate-spin-slow" style={{ fontSize: 24, marginBottom: 8 }}>⏳</div>
+              <div className="animate-spin-slow" style={{ fontSize: 24, marginBottom: 8 }}>...</div>
               <div style={{ fontSize: 13 }}>Loading…</div>
             </div>
           ) : templates.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '32px 0', color: '#334155' }}>
-              <div style={{ fontSize: 32, marginBottom: 8 }}>🗂️</div>
+              <div style={{ fontSize: 14, marginBottom: 8, color: '#475569' }}>No templates</div>
               <div style={{ fontSize: 13 }}>No templates saved yet.</div>
             </div>
           ) : (
@@ -237,7 +237,7 @@ export default function TemplateManager({ mode, labels, onLoad, onClose }) {
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: '#f1f5f9', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      📄 {t.name}
+                      {t.name}
                     </div>
                     {t.created_at && (
                       <div style={{ fontSize: 11, color: '#475569', marginTop: 2 }}>
@@ -266,7 +266,7 @@ export default function TemplateManager({ mode, labels, onLoad, onClose }) {
                       }}
                       onMouseOver={e => e.currentTarget.style.background = 'rgba(239,68,68,0.12)'}
                       onMouseOut={e => e.currentTarget.style.background = 'none'}
-                    >🗑</button>
+                    >Del</button>
                   </div>
                 </div>
               ))}

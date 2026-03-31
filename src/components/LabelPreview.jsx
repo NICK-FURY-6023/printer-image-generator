@@ -316,7 +316,8 @@ export default function LabelPreview({
           }
 
           // ── FOOTER — Two lines: Company/India + Mfg date/Customer Care ──
-          const footerTop = cy + CH - 5;
+          // Footer — 3 lines
+          const footerTop = cy + CH - 6.5;
           pdf.setLineWidth(0.1);
           pdf.line(cx + STRIP_W, footerTop, cx + CW, footerTop);
 
@@ -326,12 +327,15 @@ export default function LabelPreview({
           pdf.text('Jaquar & Co. Pvt. Ltd.', contentX, footerTop + 1.5);
           pdf.text('Made in India', contentX + contentW, footerTop + 1.5, { align: 'right' });
 
-          // Line 2: Mfg date + Customer Care
+          // Line 2: Mfg date + Email
           pdf.setFontSize(s(2.5));
           pdf.setTextColor(50, 50, 50);
           const mfgDate = label.mfgDate?.trim() || '___/____';
-          pdf.text(`Mth/Yr of Mfg: ${mfgDate}`, contentX, footerTop + 3.5);
-          pdf.text('Customer Care: 1800-102-9900', contentX + contentW, footerTop + 3.5, { align: 'right' });
+          pdf.text(`Mth/Yr of Mfg: ${mfgDate}`, contentX, footerTop + 3.3);
+          pdf.text('service@jaquar.com', contentX + contentW, footerTop + 3.3, { align: 'right' });
+
+          // Line 3: Phone number
+          pdf.text('Tel: 1800-102-9900', contentX + contentW, footerTop + 5, { align: 'right' });
           pdf.setTextColor(0, 0, 0);
         }
         } // end pageIdx loop
