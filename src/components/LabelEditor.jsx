@@ -7,6 +7,7 @@ const FIELDS = [
   { key: 'price',        label: 'MRP (₹ Per Piece)',   placeholder: 'e.g. 3,800.00',                        span: 1 },
   { key: 'size',         label: 'Size',                placeholder: 'e.g. 15mm (1/2")',                      span: 1 },
   { key: 'qty',          label: 'Qty',                 placeholder: 'e.g. 1',                                span: 1 },
+  { key: 'mfgDate',      label: 'Mth/Yr of Mfg',      placeholder: 'e.g. 03/2026',                          span: 1 },
   { key: 'product',      label: 'Product Name',        placeholder: 'e.g. Concealed Body Diverter',         span: 2, searchable: true },
   { key: 'description',  label: 'Product Description', placeholder: 'e.g. CONCEALED BODY FOR SINGLE LEVER HIGH FLOW DIVERTER...', span: 2 },
   { key: 'productImage', label: 'Product Image URL',   placeholder: 'Paste product photo URL',              span: 2 },
@@ -166,7 +167,7 @@ function JaquarSearchDropdown({ results, loading, liveLoading, onSelect, visible
 }
 
 const emptyLabel = () => ({
-  product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '', productImage: '', size: '', qty: '',
+  product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '', productImage: '', size: '', qty: '', mfgDate: '',
 });
 const isFilled   = (l) => !!(l.product?.trim() || l.code?.trim() || l.price?.trim());
 
@@ -285,12 +286,17 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
     // Build product URL for Jaquar website
     const jaquarUrl = product.url ? `https://www.jaquar.com${product.url}` : '';
 
-    // Fill ALL fields instantly from local DB (code, name, price, image)
+    // Auto-fill mfg date with current month/year
+    const now = new Date();
+    const mfgDate = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+
+    // Fill ALL fields instantly from local DB (code, name, price, image, mfgDate)
     const fields = {
       code: product.code || '',
       product: product.name || '',
       productUrl: jaquarUrl,
       productImage: product.image || '',
+      mfgDate,
     };
     if (product.price) {
       const priceStr = typeof product.price === 'number'

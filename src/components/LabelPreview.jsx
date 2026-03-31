@@ -330,7 +330,8 @@ export default function LabelPreview({
           // Line 2: Mfg date + Customer Care
           pdf.setFontSize(s(2.5));
           pdf.setTextColor(50, 50, 50);
-          pdf.text('Mth/Yr of Mfg: ___/____', contentX, footerTop + 3.5);
+          const mfgDate = label.mfgDate?.trim() || '___/____';
+          pdf.text(`Mth/Yr of Mfg: ${mfgDate}`, contentX, footerTop + 3.5);
           pdf.text('Customer Care: 1800-102-9900', contentX + contentW, footerTop + 3.5, { align: 'right' });
           pdf.setTextColor(0, 0, 0);
         }

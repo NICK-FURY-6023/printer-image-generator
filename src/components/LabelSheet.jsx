@@ -44,6 +44,7 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
   const price = label.price?.trim() || '';
   const size = label.size?.trim() || '';
   const qty = label.qty?.trim() || '';
+  const mfgDate = label.mfgDate?.trim() || '';
   const logoUrl = label.logoUrl?.trim() || '/jaquar-logo.png';
   const productUrl = label.productUrl?.trim() || '';
   const productImage = label.productImage?.trim() || '';
@@ -225,7 +226,7 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
             <span>Made in India</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: s(2.8), color: '#333' }}>
-            <span>Mth/Yr of Mfg: ___/____</span>
+            <span>Mth/Yr of Mfg: {mfgDate || '___/____'}</span>
             <span>Customer Care: 1800-102-9900</span>
           </div>
         </div>
@@ -242,6 +243,7 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
   prev.label.price === next.label.price &&
   prev.label.size === next.label.size &&
   prev.label.qty === next.label.qty &&
+  prev.label.mfgDate === next.label.mfgDate &&
   prev.label.logoUrl === next.label.logoUrl &&
   prev.label.manufacturer === next.label.manufacturer &&
   prev.label.productUrl === next.label.productUrl &&
@@ -249,7 +251,7 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
 );
 
 // Bug #4 fix: proper default label so .trim() never hits undefined
-const defaultLabel = { product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '', productImage: '', size: '', qty: '' };
+const defaultLabel = { product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '', productImage: '', size: '', qty: '', mfgDate: '' };
 
 export default function LabelSheet({ labels, extraTopMargin = 0, fontScale = 1, fieldStyles }) {
   const safeLabels = Array.from({ length: 12 }, (_, i) => ({ ...defaultLabel, ...(labels[i] || {}) }));

@@ -10,13 +10,13 @@ import LabelPreview from './LabelPreview';
 import TemplateManager from './TemplateManager';
 
 const emptyLabel = () => ({
-  product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '', productImage: '', size: '', qty: '',
+  product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '', productImage: '', size: '', qty: '', mfgDate: '',
 });
 const initialLabels = () => Array.from({ length: 12 }, emptyLabel);
 const DRAFT_KEY   = 'ganpati_draft';
 const HISTORY_KEY = 'ganpati_history';
 
-const CSV_COLUMNS = ['manufacturer', 'logoUrl', 'code', 'product', 'description', 'price', 'productUrl', 'productImage', 'size', 'qty'];
+const CSV_COLUMNS = ['manufacturer', 'logoUrl', 'code', 'product', 'description', 'price', 'productUrl', 'productImage', 'size', 'qty', 'mfgDate'];
 const SAMPLE_CSV = `manufacturer,logoUrl,code,product,description,price
 Jaquar,/jaquar-logo.png,ALD-CHR-070N,Concealed Body Diverter,High quality brass concealed body for single lever high flow diverter,3800.00
 Jaquar,/jaquar-logo.png,FLR-CHR-005B,Single Lever Basin Mixer,Chrome plated single lever basin mixer with hot & cold,2200.00
