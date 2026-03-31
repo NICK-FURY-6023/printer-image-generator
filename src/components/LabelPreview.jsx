@@ -48,14 +48,10 @@ export default function LabelPreview({
   pages,
   onSave, onLoad, onPrint,
   copies = 1, onCopiesChange,
-  fontScale = 1, onFontScaleChange,
-  fieldStyles, onFieldStylesChange,
 }) {
   const containerRef = useRef(null);
   const [scale, setScale] = useState(0.6);
   const [pdfLoading, setPdfLoading] = useState(false);
-  const [printMargin, setPrintMargin] = useState(0);
-  const [showCalibration, setShowCalibration] = useState(false);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -245,105 +241,11 @@ export default function LabelPreview({
           Load
         </ToolBtn>
 
-        {/* Calibrate toggle */}
-        <ToolBtn
-          onClick={() => setShowCalibration(o => !o)}
-          variant={showCalibration ? 'green' : 'ghost'}
-          style={{ marginLeft: 'auto' }}
-        >
-          <Icon d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
-          Calibrate
-        </ToolBtn>
-
         {/* Stats */}
         <div style={{ padding: '4px 10px', borderRadius: 20, background: '#0f172a', border: '1px solid #334155', fontSize: 11, color: '#64748b', whiteSpace: 'nowrap' }}>
           {totalFilled}/{totalPages * 12}{totalPages > 1 ? ` (${totalPages}pg)` : ''} &middot; <span style={{ color: '#f97316' }}>{Math.round(scale * 100)}%</span>
         </div>
       </div>
-
-      {/* ── Calibration Panel ──────────────────────────────────────────── */}
-      {showCalibration && (
-        <div style={{
-          background: '#1e293b', border: '1px solid #334155',
-          borderRadius: 12, padding: '14px 16px', flexShrink: 0,
-          display: 'flex', flexDirection: 'column', gap: 12,
-        }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.1em' }}>
-            PRINT CALIBRATION
-          </div>
-
-          {/* Top margin */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label style={{ fontSize: 12, color: '#64748b', minWidth: 130 }}>Top margin offset <span style={{ fontSize: 9, color: '#475569' }}>(− up, + down)</span></label>
-            <input type="range" min="-5" max="5" step="0.5"
-              value={printMargin} onChange={e => setPrintMargin(Number(e.target.value))}
-              style={{ flex: 1, accentColor: '#f97316' }} />
-            <span style={{ fontSize: 12, color: '#f97316', minWidth: 44, textAlign: 'right' }}>
-              {printMargin > 0 ? '+' : ''}{printMargin}mm
-            </span>
-            <ToolBtn onClick={() => setPrintMargin(0)} variant="ghost" style={{ fontSize: 10, padding: '4px 8px' }}>Reset</ToolBtn>
-          </div>
-
-          {/* Font scale */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label style={{ fontSize: 12, color: '#64748b', minWidth: 130 }}>Font size scale</label>
-            <input type="range" min="0.6" max="1.5" step="0.05"
-              value={fontScale} onChange={e => onFontScaleChange && onFontScaleChange(Number(e.target.value))}
-              style={{ flex: 1, accentColor: '#7c3aed' }} />
-            <span style={{ fontSize: 12, color: '#7c3aed', minWidth: 44, textAlign: 'right' }}>
-              {Math.round(fontScale * 100)}%
-            </span>
-            <ToolBtn onClick={() => onFontScaleChange && onFontScaleChange(1)} variant="ghost" style={{ fontSize: 10, padding: '4px 8px' }}>Reset</ToolBtn>
-          </div>
-
-          {/* ── Per-field Size & Bold sliders ── */}
-          {fieldStyles && onFieldStylesChange && (
-            <>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.1em', marginTop: 4 }}>
-                PER-FIELD CONTROLS
-              </div>
-              {[
-                { key: 'code',  label: 'Product Code',  color: '#38bdf8' },
-                { key: 'name',  label: 'Product Name',  color: '#4ade80' },
-                { key: 'desc',  label: 'Product Desc',  color: '#facc15' },
-                { key: 'price', label: 'Product Price', color: '#fb923c' },
-              ].map(({ key, label, color }) => (
-                <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '6px 0', borderTop: '1px solid #0f172a' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color, letterSpacing: '0.04em' }}>{label}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 10, color: '#64748b', minWidth: 36 }}>Size</span>
-                    <input type="range" min="0.5" max="2" step="0.05"
-                      value={fieldStyles[key]?.size ?? 1}
-                      onChange={e => onFieldStylesChange(prev => ({ ...prev, [key]: { ...prev[key], size: Number(e.target.value) } }))}
-                      style={{ flex: 1, accentColor: color }} />
-                    <span style={{ fontSize: 11, color, minWidth: 36, textAlign: 'right' }}>
-                      {Math.round((fieldStyles[key]?.size ?? 1) * 100)}%
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 10, color: '#64748b', minWidth: 36 }}>Bold</span>
-                    <input type="range" min="0.5" max="1.5" step="0.05"
-                      value={fieldStyles[key]?.bold ?? 1}
-                      onChange={e => onFieldStylesChange(prev => ({ ...prev, [key]: { ...prev[key], bold: Number(e.target.value) } }))}
-                      style={{ flex: 1, accentColor: color }} />
-                    <span style={{ fontSize: 11, color, minWidth: 36, textAlign: 'right' }}>
-                      {Math.round((fieldStyles[key]?.bold ?? 1) * 100)}%
-                    </span>
-                  </div>
-                </div>
-              ))}
-              <ToolBtn
-                onClick={() => onFieldStylesChange({ code: { size: 1, bold: 1 }, name: { size: 1, bold: 1 }, desc: { size: 1, bold: 1 }, price: { size: 1, bold: 1 } })}
-                variant="ghost" style={{ fontSize: 10, padding: '5px 10px', alignSelf: 'flex-start' }}
-              >Reset all fields</ToolBtn>
-            </>
-          )}
-
-          <p style={{ fontSize: 11, color: '#475569', margin: 0 }}>
-            Adjust margin if labels print shifted. Font scale resizes all text. Per-field controls adjust individual sections.
-          </p>
-        </div>
-      )}
 
       {/* ── Status bar ─────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, padding: '0 4px' }}>
@@ -365,7 +267,7 @@ export default function LabelPreview({
           boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 4px 16px rgba(249,115,22,0.08)',
         }}>
           <div className="print-scale-wrapper" style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: A4_W, height: A4_H }}>
-            <LabelSheet labels={labels} extraTopMargin={printMargin} fontScale={fontScale} fieldStyles={fieldStyles} />
+            <LabelSheet labels={labels} />
           </div>
         </div>
       </div>
@@ -375,7 +277,7 @@ export default function LabelPreview({
         <div className="print-root" style={{ display: 'none' }}>
           {Array.from({ length: copies }, (_, copyIdx) =>
             (pages || [labels]).map((pageLabels, pageIdx) => (
-              <LabelSheet key={`${copyIdx}-${pageIdx}`} labels={pageLabels} extraTopMargin={printMargin} fontScale={fontScale} fieldStyles={fieldStyles} />
+              <LabelSheet key={`${copyIdx}-${pageIdx}`} labels={pageLabels} />
             ))
           )}
         </div>,

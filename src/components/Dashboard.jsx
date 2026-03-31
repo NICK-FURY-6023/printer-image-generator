@@ -619,13 +619,6 @@ export default function Dashboard() {
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showTemplatesGallery, setShowTemplatesGallery] = useState(false);
   const [copies, setCopies] = useState(1);
-  const [fontScale, setFontScale] = useState(1);
-  const [fieldStyles, setFieldStyles] = useState({
-    code:  { size: 1, bold: 1 },
-    name:  { size: 1, bold: 1 },
-    desc:  { size: 1, bold: 1 },
-    price: { size: 1, bold: 1 },
-  });
   const autoSaveTimer = useRef(null);
 
   // Auto-save draft (debounced on change + periodic every 30s)
@@ -1136,10 +1129,6 @@ export default function Dashboard() {
             onLoad={openLoad}
             copies={copies}
             onCopiesChange={setCopies}
-            fontScale={fontScale}
-            onFontScaleChange={setFontScale}
-            fieldStyles={fieldStyles}
-            onFieldStylesChange={setFieldStyles}
             onPrint={handlePrint}
           />
         </div>

@@ -37,7 +37,7 @@ function useQRCode(url) {
   return dataUrl;
 }
 
-const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles }) {
+const LabelCell = memo(function LabelCell({ label }) {
   const brand = label.manufacturer?.trim() || '';
   const code = label.code?.trim() || '';
   const product = label.product?.trim() || '';
@@ -53,7 +53,7 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
     ? `/api/image-proxy?url=${encodeURIComponent(productImage)}`
     : productImage;
   const qrDataUrl = useQRCode(productUrl);
-  const s = (pt) => `${pt * fontScale}pt`;
+  const s = (pt) => `${pt}pt`;
   const B = '0.3mm solid #000';
   const BD = '0.2mm solid #000';
   const [logoError, setLogoError] = useState(false);
@@ -178,9 +178,8 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
               <div style={{
                 fontSize: s(4.5), fontWeight: 900,
                 textTransform: 'uppercase', lineHeight: 1.3,
-                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
                 overflow: 'hidden', wordBreak: 'break-word',
-                maxHeight: `${4.5 * fontScale * 2 * 1.3}pt`,
+                maxHeight: '2.6em',
               }}>
                 {product}
               </div>
@@ -189,10 +188,9 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
               <div style={{
                 fontSize: s(3.5), fontWeight: 600,
                 lineHeight: 1.3, textTransform: 'uppercase',
-                display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
                 overflow: 'hidden', wordBreak: 'break-word',
                 marginTop: product ? '0.5mm' : 0,
-                maxHeight: `${3.5 * fontScale * 3 * 1.3}pt`,
+                maxHeight: '2.6em',
               }}>
                 {description || ''}
               </div>
@@ -253,8 +251,6 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
     </div>
   );
 }, (prev, next) =>
-  prev.fontScale === next.fontScale &&
-  prev.fieldStyles === next.fieldStyles &&
   prev.label.code === next.label.code &&
   prev.label.product === next.label.product &&
   prev.label.description === next.label.description &&
@@ -271,7 +267,7 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
 // Bug #4 fix: proper default label so .trim() never hits undefined
 const defaultLabel = { product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '', productImage: '', size: '', qty: '', mfgDate: '' };
 
-export default function LabelSheet({ labels, extraTopMargin = 0, fontScale = 1, fieldStyles }) {
+export default function LabelSheet({ labels }) {
   const safeLabels = Array.from({ length: 12 }, (_, i) => {
     const l = { ...defaultLabel, ...(labels[i] || {}) };
     if (!l.mfgDate) l.mfgDate = generateMfgDate();
@@ -280,10 +276,9 @@ export default function LabelSheet({ labels, extraTopMargin = 0, fontScale = 1, 
   return (
     <div
       className="sheet print-sheet"
-      style={extraTopMargin !== 0 ? { paddingTop: `${7 + extraTopMargin}mm`, paddingBottom: `${7 - extraTopMargin}mm` } : undefined}
     >
       {safeLabels.map((label, i) => (
-        <LabelCell key={i} label={label} fontScale={fontScale} fieldStyles={fieldStyles} />
+        <LabelCell key={i} label={label} />
       ))}
     </div>
   );
