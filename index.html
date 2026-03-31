@@ -9,7 +9,7 @@
     <meta name="description" content="Precision A4 label printing system for Shree Ganpati Agency. Print 12 labels (105×48mm) per sheet, save cloud templates, export PDF. Admin-only access." />
     <meta name="keywords" content="label printing, A4 labels, product labels, sticker printing, Ganpati Agency, label generator, 105x48mm" />
     <meta name="author" content="Shree Ganpati Agency" />
-    <meta name="robots" content="noindex, nofollow" />
+    <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#f97316" />
 
     <!-- ─── Favicon set ───────────────────────────── -->
@@ -43,7 +43,24 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Label Print" />
     <meta name="msapplication-TileColor" content="#f97316" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- ─── SEO Structured Data ─────────────────── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Shree Ganpati Agency Label Print System",
+      "applicationCategory": "BusinessApplication",
+      "description": "Professional A4 label printing system with Jaquar product integration. Print 12 labels per sheet with QR codes, cloud templates, and PDF export.",
+      "url": "https://printer-image-generator.vercel.app",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "INR" },
+      "author": { "@type": "Organization", "name": "Shree Ganpati Agency" },
+      "softwareVersion": "3.0.0"
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

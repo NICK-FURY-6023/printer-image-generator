@@ -7,8 +7,10 @@ function verifyToken(req) {
   return jwt.verify(authHeader.slice(7), process.env.JWT_SECRET);
 }
 
+const ALLOWED_ORIGIN = process.env.FRONTEND_URL || 'https://printer-image-generator.vercel.app';
+
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
   res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -31,6 +33,16 @@ module.exports = async (req, res) => {
       const name = (req.body.name || '').trim();
       const label_data = req.body.label_data;
       if (!name || name.length > 100) return res.status(400).json({ error: 'Template name required (max 100 chars)' });
+      if (label_data !== undefined) {
+        if (!label_data || typeof label_data !== 'object') {
+          return res.status(400).json({ error: 'label_data is required' });
+        }
+        if (Array.isArray(label_data)) {
+          if (label_data.length < 1) return res.status(400).json({ error: 'label_data must not be empty' });
+        } else if (!label_data.pages || !Array.isArray(label_data.pages) || label_data.pages.length < 1) {
+          return res.status(400).json({ error: 'label_data must be an array or contain a pages array' });
+        }
+      }
       const data = await db.updateTemplate(id, name, label_data);
       return res.json(data);
     }

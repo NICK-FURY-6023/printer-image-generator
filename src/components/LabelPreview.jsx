@@ -1,5 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
+
+import { dynamicImport } from '../utils/dynamicImport';
 import LabelSheet from './LabelSheet';
 
 const A4_W = 794;
@@ -42,15 +45,13 @@ function ToolBtn({ onClick, disabled, title, children, variant = 'ghost', style:
 
 export default function LabelPreview({
   labels,
+  pages,
   onSave, onLoad, onPrint,
   copies = 1, onCopiesChange,
-  fontScale = 1, onFontScaleChange,
 }) {
   const containerRef = useRef(null);
   const [scale, setScale] = useState(0.6);
   const [pdfLoading, setPdfLoading] = useState(false);
-  const [printMargin, setPrintMargin] = useState(0);
-  const [showCalibration, setShowCalibration] = useState(false);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -73,52 +74,95 @@ export default function LabelPreview({
     setPdfLoading(true);
     const tid = toast.loading('Generating PDF…');
     try {
-      const { default: jsPDF }       = await import('jspdf');
-      const { default: html2canvas } = await import('html2canvas');
-      const sheet = document.querySelector('.print-sheet');
-      if (!sheet) throw new Error('Sheet not found');
+      const { default: jsPDF } = await dynamicImport(() => import('jspdf'));
+      const { toCanvas } = await dynamicImport(() => import('html-to-image'));
 
-      // Clone sheet into an off-screen full-size container so the
-      // parent's preview transform (scale) doesn't shrink the capture.
-      const offscreen = document.createElement('div');
-      offscreen.style.cssText =
-        'position:fixed;top:0;left:0;width:210mm;height:297mm;z-index:-9999;overflow:hidden;pointer-events:none;background:#fff;';
-      const clone = sheet.cloneNode(true);
-      clone.style.transform = 'none';
-      offscreen.appendChild(clone);
-      document.body.appendChild(offscreen);
+      const pdf = new jsPDF({ format: 'a4', unit: 'mm', orientation: 'portrait', compress: true });
 
-      // Wait a tick for images inside the clone to start loading
-      await new Promise(r => setTimeout(r, 600));
+      // Use the print portal sheets — they render pixel-perfect labels
+      const printRoot = document.querySelector('.print-root');
+      if (!printRoot) throw new Error('Print root not found');
 
-      const canvas = await html2canvas(clone, {
-        scale: 4, useCORS: true, allowTaint: false,
-        backgroundColor: '#ffffff',
-        width: A4_W, height: A4_H,
-        windowWidth: A4_W, windowHeight: A4_H,
-      });
+      // Make print-root visible on-screen so browser can compute styles
+      const origDisplay = printRoot.style.display;
+      printRoot.style.display = 'block';
+      printRoot.style.position = 'absolute';
+      printRoot.style.left = '0';
+      printRoot.style.top = '0';
+      printRoot.style.width = '210mm';
+      printRoot.style.zIndex = '-1';
+      printRoot.style.opacity = '0';
+      printRoot.style.pointerEvents = 'none';
 
-      document.body.removeChild(offscreen);
+      // Wait for all images inside print-root to finish loading
+      const imgs = printRoot.querySelectorAll('img');
+      await Promise.all(Array.from(imgs).map(img =>
+        img.complete ? Promise.resolve() : new Promise(r => { img.onload = r; img.onerror = r; })
+      ));
+      // Let browser paint elements fully
+      await new Promise(r => setTimeout(r, 200));
 
-      const pdf = new jsPDF({ format: 'a4', unit: 'mm', orientation: 'portrait' });
-      pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', 0, 0, 210, 297);
+      const sheets = printRoot.querySelectorAll('.print-sheet');
+      if (!sheets.length) throw new Error('No label sheets found');
+
+      let isFirstPage = true;
+      for (const sheet of sheets) {
+        if (!isFirstPage) pdf.addPage();
+        isFirstPage = false;
+
+        // html-to-image uses browser's own rendering engine (SVG foreignObject)
+        // — supports CSS Grid, flexbox, all properties natively
+        const canvas = await toCanvas(sheet, {
+          pixelRatio: 3,
+          backgroundColor: '#ffffff',
+          cacheBust: true,
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+      }
+
+      // Restore print-root to hidden
+      printRoot.style.display = origDisplay;
+      printRoot.style.position = '';
+      printRoot.style.left = '';
+      printRoot.style.top = '';
+      printRoot.style.width = '';
+      printRoot.style.zIndex = '';
+      printRoot.style.opacity = '';
+      printRoot.style.pointerEvents = '';
+
       pdf.save('ganpati-labels.pdf');
       toast.success('PDF downloaded!', { id: tid });
-    } catch {
-      toast.error('PDF failed. Use Print → Save as PDF instead.', { id: tid });
+    } catch (err) {
+      // Restore print-root on error
+      const pr = document.querySelector('.print-root');
+      if (pr) {
+        pr.style.display = 'none';
+        pr.style.position = '';
+        pr.style.left = '';
+        pr.style.top = '';
+        pr.style.width = '';
+        pr.style.zIndex = '';
+        pr.style.opacity = '';
+        pr.style.pointerEvents = '';
+      }
+      toast.error(`PDF generation failed: ${err?.message || 'Unknown error'}. Try Ctrl+P → Save as PDF.`, { id: tid });
     } finally {
       setPdfLoading(false);
     }
   };
 
   const filledCount = labels.filter(l => l.product?.trim()).length;
+  const totalPages = pages ? pages.length : 1;
+  const totalFilled = pages ? pages.reduce((sum, p) => sum + p.filter(l => l.product?.trim()).length, 0) : filledCount;
 
   return (
     <div ref={containerRef} style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: 16, gap: 12 }}>
 
       {/* ── Toolbar ─────────────────────────────────────────────────────── */}
-      <div style={{
-        background: '#1e293b', borderRadius: 12, padding: '10px 14px',
+      <div className="depth-shadow" style={{
+        background: 'linear-gradient(180deg, #1e293b, #1a2536)', borderRadius: 12, padding: '10px 14px',
         border: '1px solid #334155', display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center',
         flexShrink: 0,
       }}>
@@ -151,6 +195,47 @@ export default function LabelPreview({
           PDF
         </ToolBtn>
 
+        {/* PNG Export */}
+        <ToolBtn onClick={async () => {
+          const tid = toast.loading('Generating PNG…');
+          try {
+            const { toPng } = await dynamicImport(() => import('html-to-image'));
+            const sheet = containerRef.current?.querySelector('.print-scale-wrapper');
+            if (!sheet) throw new Error('Preview not found');
+            const dataUrl = await toPng(sheet, { pixelRatio: 2, backgroundColor: '#ffffff', cacheBust: true });
+            const link = document.createElement('a');
+            link.download = `ganpati-labels-${Date.now()}.png`;
+            link.href = dataUrl;
+            link.click();
+            toast.success('PNG downloaded!', { id: tid });
+          } catch (err) { toast.error(`PNG failed: ${err?.message || 'Error'}`, { id: tid }); }
+        }} variant="ghost">
+          <Icon d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-4-4 4m0 0-4-4m4 4V4" />
+          PNG
+        </ToolBtn>
+
+        {/* SVG Export */}
+        <ToolBtn onClick={async () => {
+          const tid = toast.loading('Generating SVG…');
+          try {
+            const { toSvg } = await dynamicImport(() => import('html-to-image'));
+            const sheet = containerRef.current?.querySelector('.print-scale-wrapper');
+            if (!sheet) throw new Error('Preview not found');
+            const dataUrl = await toSvg(sheet, { backgroundColor: '#ffffff', cacheBust: true });
+            const svgText = decodeURIComponent(dataUrl.split(',')[1]);
+            const blob = new Blob([svgText], { type: 'image/svg+xml' });
+            const link = document.createElement('a');
+            link.download = `ganpati-labels-${Date.now()}.svg`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(link.href), 200);
+            toast.success('SVG downloaded!', { id: tid });
+          } catch (err) { toast.error(`SVG failed: ${err?.message || 'Error'}`, { id: tid }); }
+        }} variant="ghost">
+          <Icon d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-4-4 4m0 0-4-4m4 4V4" />
+          SVG
+        </ToolBtn>
+
         {/* Save / Load */}
         <ToolBtn onClick={onSave} variant="ghost">
           <Icon d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
@@ -161,94 +246,48 @@ export default function LabelPreview({
           Load
         </ToolBtn>
 
-        {/* Calibrate toggle */}
-        <ToolBtn
-          onClick={() => setShowCalibration(o => !o)}
-          variant={showCalibration ? 'green' : 'ghost'}
-          style={{ marginLeft: 'auto' }}
-        >
-          <Icon d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
-          Calibrate
-        </ToolBtn>
-
         {/* Stats */}
         <div style={{ padding: '4px 10px', borderRadius: 20, background: '#0f172a', border: '1px solid #334155', fontSize: 11, color: '#64748b', whiteSpace: 'nowrap' }}>
-          {filledCount}/12 &middot; <span style={{ color: '#f97316' }}>{Math.round(scale * 100)}%</span>
+          {totalFilled}/{totalPages * 12}{totalPages > 1 ? ` (${totalPages}pg)` : ''} &middot; <span style={{ color: '#f97316' }}>{Math.round(scale * 100)}%</span>
         </div>
       </div>
-
-      {/* ── Calibration Panel ──────────────────────────────────────────── */}
-      {showCalibration && (
-        <div style={{
-          background: '#1e293b', border: '1px solid #334155',
-          borderRadius: 12, padding: '14px 16px', flexShrink: 0,
-          display: 'flex', flexDirection: 'column', gap: 12,
-        }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.1em' }}>
-            PRINT CALIBRATION
-          </div>
-
-          {/* Top margin */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label style={{ fontSize: 12, color: '#64748b', minWidth: 130 }}>Top margin offset</label>
-            <input type="range" min="-5" max="5" step="0.5"
-              value={printMargin} onChange={e => setPrintMargin(Number(e.target.value))}
-              style={{ flex: 1, accentColor: '#f97316' }} />
-            <span style={{ fontSize: 12, color: '#f97316', minWidth: 44, textAlign: 'right' }}>
-              {printMargin > 0 ? '+' : ''}{printMargin}mm
-            </span>
-            <ToolBtn onClick={() => setPrintMargin(0)} variant="ghost" style={{ fontSize: 10, padding: '4px 8px' }}>Reset</ToolBtn>
-          </div>
-
-          {/* Font scale */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label style={{ fontSize: 12, color: '#64748b', minWidth: 130 }}>Font size scale</label>
-            <input type="range" min="0.8" max="1.3" step="0.05"
-              value={fontScale} onChange={e => onFontScaleChange && onFontScaleChange(Number(e.target.value))}
-              style={{ flex: 1, accentColor: '#7c3aed' }} />
-            <span style={{ fontSize: 12, color: '#7c3aed', minWidth: 44, textAlign: 'right' }}>
-              {Math.round(fontScale * 100)}%
-            </span>
-            <ToolBtn onClick={() => onFontScaleChange && onFontScaleChange(1)} variant="ghost" style={{ fontSize: 10, padding: '4px 8px' }}>Reset</ToolBtn>
-          </div>
-
-          <p style={{ fontSize: 11, color: '#475569', margin: 0 }}>
-            Adjust margin if labels print shifted up/down. Font scale resizes all label text.
-          </p>
-        </div>
-      )}
 
       {/* ── Status bar ─────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, padding: '0 4px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 5px #22c55e' }} />
-          <span style={{ fontSize: 11, color: '#475569' }}>Live A4 Preview &middot; 210×297mm &middot; 12 labels</span>
+          <span style={{ fontSize: 11, color: '#475569' }}>Live A4 Preview &middot; 210×297mm &middot; {totalPages > 1 ? `${totalPages} pages · ` : ''}{totalFilled} labels</span>
         </div>
-        {copies > 1 && (
-          <span style={{ fontSize: 11, color: '#f97316', fontWeight: 600 }}>{copies} copies on print</span>
+        {(copies > 1 || totalPages > 1) && (
+          <span style={{ fontSize: 11, color: '#f97316', fontWeight: 600 }}>
+            {totalPages * copies} sheet{totalPages * copies > 1 ? 's' : ''} on print
+          </span>
         )}
       </div>
 
-      {/* ── Scaled preview ─────────────────────────────────────────────── */}
+      {/* ── Scaled preview (screen only) ──────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingBottom: 16, overflow: 'hidden' }}>
-        <div style={{
-          width: A4_W * scale, height: A4_H * scale, flexShrink: 0, borderRadius: 4, overflow: 'hidden',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)',
+        <div className="print-preview-frame card-3d" style={{
+          width: A4_W * scale, height: A4_H * scale, flexShrink: 0, borderRadius: 6, overflow: 'hidden',
+          boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), 0 4px 16px rgba(249,115,22,0.08)',
         }}>
           <div className="print-scale-wrapper" style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: A4_W, height: A4_H }}>
-            <LabelSheet labels={labels} extraTopMargin={printMargin} fontScale={fontScale} />
+            <LabelSheet labels={labels} />
           </div>
         </div>
       </div>
 
-      {/* ── Hidden print copies (print-only) ───────────────────────────── */}
-      <div className="print-copies-container" style={{ display: 'none' }}>
-        {Array.from({ length: Math.max(0, copies - 1) }, (_, i) => (
-          <div key={i} className="print-sheet" style={{ pageBreakBefore: 'always' }}>
-            <LabelSheet labels={labels} extraTopMargin={printMargin} fontScale={fontScale} />
-          </div>
-        ))}
-      </div>
+      {/* ── Print Portal: renders directly under <body> for reliable Ctrl+P ── */}
+      {createPortal(
+        <div className="print-root" style={{ display: 'none' }}>
+          {Array.from({ length: copies }, (_, copyIdx) =>
+            (pages || [labels]).map((pageLabels, pageIdx) => (
+              <LabelSheet key={`${copyIdx}-${pageIdx}`} labels={pageLabels} />
+            ))
+          )}
+        </div>,
+        document.body
+      )}
     </div>
   );
 }

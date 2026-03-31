@@ -28,8 +28,12 @@ function parseProducts(html) {
     const urlMatch = block.match(/<a href="(\/en\/[^"]*\?Id=\d+)"/);
     const productUrl = urlMatch ? urlMatch[1] : '';
 
+    // Extract price from search results
+    const priceMatch = block.match(/actual-price[^>]*>[\s\S]*?(?:&#x20B9;|₹)\s*([\d,]+(?:\.\d+)?)/);
+    const price = priceMatch ? parseFloat(priceMatch[1].replace(/,/g, '')) : null;
+
     if (name || code) {
-      products.push({ id, name, code, image, url: productUrl });
+      products.push({ id, name, code, image, url: productUrl, price });
     }
   }
   return products;
@@ -45,6 +49,7 @@ async function fetchSearch(query) {
       'X-Forwarded-For': '103.21.125.1',
     },
   });
+  if (!resp.ok) throw new Error(`Upstream returned HTTP ${resp.status}`);
   return await resp.text();
 }
 
@@ -54,7 +59,8 @@ function looksLikeCode(q) {
 }
 
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const ALLOWED_ORIGIN = process.env.FRONTEND_URL || 'https://printer-image-generator.vercel.app';
+  res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -62,28 +68,32 @@ module.exports = async (req, res) => {
 
   const q = (req.query.q || '').trim();
   if (!q || q.length < 2) return res.json([]);
+  if (q.length > 100) return res.json([]); // prevent abuse
 
   try {
     const html = await fetchSearch(q);
     let products = parseProducts(html);
 
-    // If no results and query looks like a code with trailing letter suffix,
+    // If no results and query looks like a code with known trailing suffix letter,
     // retry without the suffix (e.g. ALD-CHR-055N → ALD-CHR-055)
     if (products.length === 0 && looksLikeCode(q)) {
-      const stripped = q.replace(/[A-Z]$/i, '');
-      if (stripped !== q && stripped.length >= 3) {
+      const knownSuffix = /[NMSFBT]$/i;
+      const stripped = knownSuffix.test(q) ? q.slice(0, -1) : null;
+      if (stripped && stripped !== q && stripped.length >= 3) {
         const html2 = await fetchSearch(stripped);
         products = parseProducts(html2);
       }
     }
 
-    // If query is a specific code, move exact/closest match to top
+    // If query is a specific code, sort by match quality: exact > prefix > contains
     if (looksLikeCode(q) && products.length > 1) {
       const upper = q.toUpperCase();
       products.sort((a, b) => {
-        const aMatch = a.code.toUpperCase().startsWith(upper) ? 0 : 1;
-        const bMatch = b.code.toUpperCase().startsWith(upper) ? 0 : 1;
-        return aMatch - bMatch;
+        const ac = a.code.toUpperCase();
+        const bc = b.code.toUpperCase();
+        const aScore = ac === upper ? 0 : ac.startsWith(upper) ? 1 : 2;
+        const bScore = bc === upper ? 0 : bc.startsWith(upper) ? 1 : 2;
+        return aScore - bScore;
       });
     }
 

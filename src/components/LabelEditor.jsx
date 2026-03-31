@@ -1,18 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { generateMfgDate } from '../utils/mfgDate';
 
 const FIELDS = [
   { key: 'manufacturer', label: 'Brand Name',          placeholder: 'e.g. Jaquar',                          span: 2 },
   { key: 'logoUrl',      label: 'Brand Logo URL',      placeholder: 'Paste logo image URL',                 span: 2 },
-  { key: 'code',         label: 'Product Code',        placeholder: 'e.g. FUS-CHR-29023B',                   span: 1, searchable: true },
-  { key: 'price',        label: 'Product Price (₹)',   placeholder: 'e.g. 3800.00',                         span: 1 },
+  { key: 'code',         label: 'Model / Product Code', placeholder: 'e.g. ALD-CHR-079N',                   span: 1, searchable: true },
+  { key: 'price',        label: 'MRP (₹ Per Piece)',   placeholder: 'e.g. 3,800.00',                        span: 1 },
+  { key: 'size',         label: 'Size',                placeholder: 'e.g. 15mm (1/2")',                      span: 1 },
+  { key: 'qty',          label: 'Qty',                 placeholder: 'e.g. 1',                                span: 1 },
+  { key: 'mfgDate',      label: 'Mfg',      placeholder: 'e.g. 03/2026',                          span: 1 },
   { key: 'product',      label: 'Product Name',        placeholder: 'e.g. Concealed Body Diverter',         span: 2, searchable: true },
-  { key: 'description',  label: 'Product Description', placeholder: 'e.g. High quality brass body diverter', span: 2 },
+  { key: 'description',  label: 'Product Description', placeholder: 'e.g. CONCEALED BODY FOR SINGLE LEVER HIGH FLOW DIVERTER...', span: 2 },
+  { key: 'productImage', label: 'Product Image URL',   placeholder: 'Paste product photo URL',              span: 2 },
 ];
 
 /* ── Jaquar Search helpers ── */
 const PRODUCT_API = '/api/jaquar-product';
+const SEARCH_API = '/api/jaquar-search';
+const LIVE_SEARCH_THRESHOLD = 3; // trigger live search when local results < this
 
-// Preloaded product database (loaded once from static JSON)
+// Product database — lazy-loaded on first search, not at module level
 let _productDB = null;
 let _productDBPromise = null;
 let _productDBReady = false;
@@ -23,12 +30,15 @@ function loadProductDB() {
   _productDBPromise = fetch('/jaquar-products.json')
     .then(r => r.ok ? r.json() : [])
     .then(data => { _productDB = data; _productDBReady = true; return data; })
-    .catch(() => { _productDB = []; _productDBReady = true; return []; });
+    .catch(() => {
+      // Bug #5 fix: allow retry on failure instead of caching empty forever
+      _productDB = null;
+      _productDBPromise = null;
+      _productDBReady = false;
+      return [];
+    });
   return _productDBPromise;
 }
-
-// Start preloading immediately on module load
-loadProductDB();
 
 // Instant client-side search against preloaded DB
 function searchLocal(query, db) {
@@ -54,6 +64,30 @@ function searchLocal(query, db) {
   return results;
 }
 
+// Live search from jaquar.com via backend API
+async function fetchLiveSearch(query) {
+  try {
+    const res = await fetch(`${SEARCH_API}?q=${encodeURIComponent(query)}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data.map(p => ({ ...p, _live: true })) : [];
+  } catch { return []; }
+}
+
+// Merge live results into local results, deduplicating by code
+function mergeResults(localResults, liveResults) {
+  const seen = new Set(localResults.map(p => (p.code || '').toUpperCase().replace(/[-\s]/g, '')));
+  const merged = [...localResults];
+  for (const p of liveResults) {
+    const normCode = (p.code || '').toUpperCase().replace(/[-\s]/g, '');
+    if (!seen.has(normCode)) {
+      seen.add(normCode);
+      merged.push(p);
+    }
+  }
+  return merged;
+}
+
 async function fetchJaquarProduct(url) {
   try {
     const res = await fetch(`${PRODUCT_API}?url=${encodeURIComponent(url)}`);
@@ -72,7 +106,7 @@ function useDebounce(value, delay = 150) {
 }
 
 /* ── Search Dropdown Component ── */
-function JaquarSearchDropdown({ results, loading, onSelect, visible }) {
+function JaquarSearchDropdown({ results, loading, liveLoading, onSelect, visible }) {
   if (!visible) return null;
   return (
     <div style={{
@@ -86,7 +120,7 @@ function JaquarSearchDropdown({ results, loading, onSelect, visible }) {
           <span className="jq-spinner" /> Search ho raha hai...
         </div>
       )}
-      {!loading && results.length === 0 && (
+      {!loading && results.length === 0 && !liveLoading && (
         <div style={{ padding: '10px 12px', fontSize: 11, color: '#475569' }}>
           Koi product nahi mila
         </div>
@@ -105,24 +139,36 @@ function JaquarSearchDropdown({ results, loading, onSelect, visible }) {
             <img src={p.image} alt="" style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 4, background: '#fff', flexShrink: 0 }} />
           )}
           <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#f97316', letterSpacing: '0.02em' }}>{p.code}</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#f97316', letterSpacing: '0.02em', display: 'flex', alignItems: 'center', gap: 6 }}>
+              {p.code}
+              {p._live && (
+                <span style={{ fontSize: 8, color: '#38bdf8', background: 'rgba(56,189,248,0.12)', padding: '1px 5px', borderRadius: 6, fontWeight: 600, letterSpacing: '0.04em' }}>
+                  LIVE
+                </span>
+              )}
+            </div>
             <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
               {p.name}
             </div>
             {p.price && (
               <div style={{ fontSize: 10, color: '#22c55e', marginTop: 1, fontWeight: 600 }}>
-                MRP ₹{p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                MRP ₹{typeof p.price === 'number' ? p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : p.price}
               </div>
             )}
           </div>
         </button>
       ))}
+      {liveLoading && (
+        <div style={{ padding: '8px 12px', fontSize: 10, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(56,189,248,0.04)' }}>
+          <span className="jq-spinner" /> Jaquar.com se live search ho raha hai...
+        </div>
+      )}
     </div>
   );
 }
 
 const emptyLabel = () => ({
-  product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '',
+  product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '', productImage: '', size: '', qty: '', mfgDate: generateMfgDate(),
 });
 const isFilled   = (l) => !!(l.product?.trim() || l.code?.trim() || l.price?.trim());
 
@@ -147,44 +193,72 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [liveLoading, setLiveLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [fetchingDetail, setFetchingDetail] = useState(false);
-  const [productDB, setProductDB] = useState(null);
+  const [productDB, setProductDB] = useState(_productDB); // sync init if already loaded
+  const latestSelectRef = useRef(0); // race condition guard for async detail fetch
   const debouncedQuery = useDebounce(searchQuery, 150);
   const wrapperRef = useRef(null);
 
-  // Preload product database on first mount
-  useEffect(() => { loadProductDB().then(setProductDB); }, []);
-
-  // Instant local search when query changes
+  // Ensure product database is loaded
   useEffect(() => {
+    if (_productDB) { setProductDB(_productDB); return; }
+    loadProductDB().then(db => setProductDB(db));
+  }, []);
+
+  // Bug #13 fix: cancelled flag to prevent stale search results
+  // Live fallback: when local results are few, also search jaquar.com
+  useEffect(() => {
+    let cancelled = false;
+
     if (!debouncedQuery || debouncedQuery.length < 2) {
       setSearchResults([]);
       setSearchLoading(false);
+      setLiveLoading(false);
+      setShowDropdown(false);
       return;
     }
+
+    const doSearch = async (db) => {
+      const localResults = searchLocal(debouncedQuery, db);
+      if (cancelled) return;
+      setSearchResults(localResults);
+      setSearchLoading(false);
+      setShowDropdown(true);
+
+      // Live fallback: fetch from jaquar.com if local results are scarce
+      if (localResults.length < LIVE_SEARCH_THRESHOLD && debouncedQuery.length >= 3) {
+        setLiveLoading(true);
+        const liveResults = await fetchLiveSearch(debouncedQuery);
+        if (cancelled) return;
+        if (liveResults.length > 0) {
+          setSearchResults(prev => mergeResults(prev, liveResults));
+        }
+        setLiveLoading(false);
+      }
+    };
+
     if (!productDB) {
-      // DB still loading — wait for it then search
       setSearchLoading(true);
+      setShowDropdown(true);
       loadProductDB().then(db => {
+        if (cancelled) return;
         setProductDB(db);
-        const results = searchLocal(debouncedQuery, db);
-        setSearchResults(results);
-        setSearchLoading(false);
-        setShowDropdown(results.length > 0);
+        doSearch(db);
       });
-      return;
+    } else {
+      doSearch(productDB);
     }
-    const results = searchLocal(debouncedQuery, productDB);
-    setSearchResults(results);
-    setSearchLoading(false);
-    setShowDropdown(results.length > 0);
+
+    return () => { cancelled = true; };
   }, [debouncedQuery, productDB]);
 
   // Close dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+      if (!wrapperRef.current) return;
+      if (!wrapperRef.current.contains(e.target)) {
         setShowDropdown(false);
       }
     };
@@ -196,8 +270,14 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
     onChange(key, value);
     setSearchField(key);
     setSearchQuery(value);
-    if (value.length >= 2) setSearchLoading(true);
-    else { setShowDropdown(false); setSearchResults([]); }
+    if (value.length >= 2) {
+      setSearchLoading(true);
+      setShowDropdown(true);
+    } else {
+      setShowDropdown(false);
+      setSearchResults([]);
+      setSearchLoading(false);
+    }
   };
 
   const handleProductSelect = async (product) => {
@@ -205,27 +285,51 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
     setSearchQuery('');
     setSearchResults([]);
 
+    // Race condition guard: track this selection's generation
+    const selectId = ++latestSelectRef.current;
+
     // Build product URL for Jaquar website
     const jaquarUrl = product.url ? `https://www.jaquar.com${product.url}` : '';
 
-    // Fill ALL fields instantly from local DB (code, name, price)
+    // Auto-fill mfg date — random from 3 to 5 months before current date
+    const now = new Date();
+    const offset = Math.floor(Math.random() * 3) + 3; // 3, 4, or 5 months back
+    const mfgMonth = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    const mfgDate = `${String(mfgMonth.getMonth() + 1).padStart(2, '0')}/${mfgMonth.getFullYear()}`;
+
+    // Fill ALL fields instantly from local DB (code, name, price, image, mfgDate)
     const fields = {
       code: product.code || '',
       product: product.name || '',
       productUrl: jaquarUrl,
+      productImage: product.image || '',
+      mfgDate,
     };
     if (product.price) {
-      fields.price = product.price.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-      setPriceHint(`✅ Jaquar MRP ₹${product.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (jaquar.com)`);
+      const priceStr = typeof product.price === 'number'
+        ? product.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })
+        : product.price;
+      fields.price = priceStr;
+      setPriceHint(`Jaquar MRP ₹${priceStr} (jaquar.com)`);
     }
     onFillMulti(fields);
 
-    // Only fetch description on-demand (not in local DB)
+    // Fetch full details on-demand (description + price for live results)
     if (product.url) {
       setFetchingDetail(true);
       const detail = await fetchJaquarProduct(product.url).catch(() => null);
-      if (detail && detail.description) {
-        onFillMulti({ description: detail.description });
+      // Abort if user selected a different product while we were fetching
+      if (selectId !== latestSelectRef.current) { setFetchingDetail(false); return; }
+      if (detail) {
+        const extras = {};
+        if (detail.description) extras.description = detail.description;
+        if (detail.image) extras.productImage = detail.image;
+        // For live results without price, fill price from product page
+        if (!product.price && detail.price) {
+          extras.price = detail.price;
+          setPriceHint(`Jaquar MRP ${detail.price} (jaquar.com — live)`);
+        }
+        if (Object.keys(extras).length) onFillMulti(extras);
       }
       setFetchingDetail(false);
     }
@@ -300,14 +404,28 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
                 <div style={{ gridColumn: span === 2 ? '1 / -1' : undefined, position: 'relative' }}>
                   <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#64748b', marginBottom: 4, letterSpacing: '0.05em' }}>
                     {fl}
-                    {searchable && <span style={{ color: '#f97316', fontSize: 9, marginLeft: 4 }}>🔍 Jaquar</span>}
+                    {searchable && <span style={{ color: '#f97316', fontSize: 9, marginLeft: 4 }}>Jaquar</span>}
                   </label>
                   <input
                     type="text"
                     value={label[key] || ''}
                     onChange={e => {
                       if (searchable) handleSearchableChange(key, e.target.value);
-                      else { onChange(key, e.target.value); if (key === 'price') setPriceHint(''); }
+                      else {
+                        let val = e.target.value;
+                        // Sanitize logo URL — only allow http(s) and relative paths
+                        if (key === 'logoUrl' && val.trim() && !/^(https?:\/\/|\/)/i.test(val.trim())) {
+                          val = '';
+                        }
+                        onChange(key, val);
+                        if (key === 'price') setPriceHint('');
+                      }
+                    }}
+                    onBlur={e => {
+                      if (key === 'price' && e.target.value.trim()) {
+                        const cleaned = e.target.value.replace(/[^0-9.,]/g, '');
+                        if (cleaned !== e.target.value) onChange(key, cleaned);
+                      }
                     }}
                     onFocus={() => { if (searchable) { setSearchField(key); if (searchResults.length > 0) setShowDropdown(true); } }}
                     placeholder={placeholder}
@@ -323,6 +441,7 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
                     <JaquarSearchDropdown
                       results={searchResults}
                       loading={searchLoading}
+                      liveLoading={liveLoading}
                       visible={showDropdown}
                       onSelect={handleProductSelect}
                     />
@@ -371,11 +490,36 @@ export default function LabelEditor({ labels, setLabels }) {
   const [activeIndex, setActiveIndex]       = useState(0);
   const [applyAll, setApplyAll]             = useState(emptyLabel());
   const [applyPanelOpen, setApplyPanelOpen] = useState(false);
+  const [dragIdx, setDragIdx]               = useState(null);
+  const [dragOverIdx, setDragOverIdx]       = useState(null);
+
+  // Bug #3 fix: clamp activeIndex when labels array changes
+  useEffect(() => {
+    if (activeIndex >= labels.length) setActiveIndex(Math.max(0, labels.length - 1));
+  }, [labels.length, activeIndex]);
 
   const updateLabel    = (index, key, value) => setLabels(prev => prev.map((l, i) => i === index ? { ...l, [key]: value } : l));
   const updateLabelMulti = (index, fields) => setLabels(prev => prev.map((l, i) => i === index ? { ...l, ...fields } : l));
   const resetLabel     = (index)             => setLabels(prev => prev.map((l, i) => i === index ? emptyLabel() : l));
   const duplicateToAll = (src)               => setLabels(prev => prev.map(() => ({ ...src })));
+
+  // Drag & Drop handlers
+  const handleDragStart = (idx) => { setDragIdx(idx); };
+  const handleDragOver = (e, idx) => { e.preventDefault(); setDragOverIdx(idx); };
+  const handleDrop = (idx) => {
+    if (dragIdx !== null && dragIdx !== idx) {
+      setLabels(prev => {
+        const updated = [...prev];
+        const [dragged] = updated.splice(dragIdx, 1);
+        updated.splice(idx, 0, dragged);
+        return updated;
+      });
+      setActiveIndex(idx);
+    }
+    setDragIdx(null);
+    setDragOverIdx(null);
+  };
+  const handleDragEnd = () => { setDragIdx(null); setDragOverIdx(null); };
 
   const handleApplyAll = () => {
     setLabels(prev => prev.map(l => {
@@ -408,8 +552,45 @@ export default function LabelEditor({ labels, setLabels }) {
         </button>
       </div>
 
+      {/* Active Selection Indicator */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(249,115,22,0.12), rgba(234,88,12,0.08))',
+        border: '1px solid rgba(249,115,22,0.3)',
+        borderRadius: 10, padding: '8px 14px',
+        display: 'flex', alignItems: 'center', gap: 10,
+        animation: 'glow-ring 2.5s ease-in-out infinite',
+      }}>
+        <div style={{
+          width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+          background: 'linear-gradient(135deg,#f97316,#ea580c)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 12, fontWeight: 700, color: 'white',
+          boxShadow: '0 0 12px rgba(249,115,22,0.4)',
+        }}>
+          {activeIndex + 1}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: '#f97316', letterSpacing: '0.1em', marginBottom: 1 }}>
+            CURRENTLY EDITING — LABEL {activeIndex + 1}
+          </div>
+          <div style={{ fontSize: 12, color: '#f1f5f9', fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+            {labels[activeIndex]?.product?.trim() || labels[activeIndex]?.code?.trim() || 'Empty label'}
+            {labels[activeIndex]?.code?.trim() && labels[activeIndex]?.product?.trim() && (
+              <span style={{ color: '#94a3b8', fontWeight: 400, marginLeft: 6, fontSize: 10, fontFamily: 'monospace' }}>
+                {labels[activeIndex].code}
+              </span>
+            )}
+          </div>
+        </div>
+        {isFilled(labels[activeIndex]) && (
+          <span style={{ fontSize: 9, color: '#22c55e', background: 'rgba(34,197,94,0.12)', padding: '3px 8px', borderRadius: 10, fontWeight: 600, flexShrink: 0 }}>
+            ✓ FILLED
+          </span>
+        )}
+      </div>
+
       {/* Dot Navigator */}
-      <div style={{ background: '#1e293b', borderRadius: 12, padding: '12px 14px', border: '1px solid #334155' }}>
+      <div className="depth-shadow" style={{ background: 'linear-gradient(180deg, #1e293b, #1a2536)', borderRadius: 12, padding: '12px 14px', border: '1px solid #334155' }}>
         <div style={{ fontSize: 10, fontWeight: 600, color: '#475569', letterSpacing: '0.08em', marginBottom: 10 }}>
           JUMP TO LABEL
         </div>
@@ -516,17 +697,30 @@ export default function LabelEditor({ labels, setLabels }) {
       {/* Label Cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {labels.map((label, i) => (
-          <LabelCard
+          <div
             key={i}
-            index={i}
-            label={label}
-            isActive={activeIndex === i}
-            onActivate={setActiveIndex}
-            onChange={(key, value) => updateLabel(i, key, value)}
-            onFillMulti={(fields) => updateLabelMulti(i, fields)}
-            onDuplicateToAll={duplicateToAll}
-            onReset={resetLabel}
-          />
+            draggable
+            onDragStart={() => handleDragStart(i)}
+            onDragOver={(e) => handleDragOver(e, i)}
+            onDrop={() => handleDrop(i)}
+            onDragEnd={handleDragEnd}
+            style={{
+              opacity: dragIdx === i ? 0.4 : 1,
+              borderTop: dragOverIdx === i && dragIdx !== null && dragIdx !== i ? '2px solid #f97316' : '2px solid transparent',
+              transition: 'opacity 0.15s',
+            }}
+          >
+            <LabelCard
+              index={i}
+              label={label}
+              isActive={activeIndex === i}
+              onActivate={setActiveIndex}
+              onChange={(key, value) => updateLabel(i, key, value)}
+              onFillMulti={(fields) => updateLabelMulti(i, fields)}
+              onDuplicateToAll={duplicateToAll}
+              onReset={resetLabel}
+            />
+          </div>
         ))}
       </div>
     </div>

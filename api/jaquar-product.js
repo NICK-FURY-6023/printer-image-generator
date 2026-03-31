@@ -7,7 +7,8 @@
  * (prices are geo-restricted to India).
  */
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const ALLOWED_ORIGIN = process.env.FRONTEND_URL || 'https://printer-image-generator.vercel.app';
+  res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -15,6 +16,10 @@ module.exports = async (req, res) => {
 
   const productUrl = (req.query.url || '').trim();
   if (!productUrl) return res.status(400).json({ error: 'url param required' });
+  // SSRF protection: only allow jaquar.com paths
+  if (!productUrl.startsWith('/en/') && !productUrl.startsWith('/in/')) {
+    return res.status(400).json({ error: 'Invalid product URL — must be a jaquar.com path' });
+  }
 
   try {
     const fullUrl = `https://www.jaquar.com${productUrl}`;
@@ -26,6 +31,7 @@ module.exports = async (req, res) => {
         'X-Forwarded-For': '103.21.125.1',
       },
     });
+    if (!resp.ok) return res.status(502).json({ error: `Upstream returned HTTP ${resp.status}` });
     const html = await resp.text();
 
     // Extract product name
@@ -50,13 +56,25 @@ module.exports = async (req, res) => {
     const image = imgMatch ? imgMatch[1] : '';
 
     // Extract MRP price (geo-restricted to India — we spoof Indian IP)
+    // Multiple patterns for robustness against HTML structure changes
     let price = null;
     let priceRaw = null;
-    const priceMatch = html.match(/class="price-value-\d+"[^>]*content="([\d.]+)"[^>]*>\s*([\s\S]*?)<\/span>/);
+    let priceMatch = html.match(/class="price-value-\d+"[^>]*content="([\d.]+)"[^>]*>\s*([\s\S]*?)<\/span>/);
+    if (!priceMatch) {
+      // Fallback: content attribute in different order
+      priceMatch = html.match(/content="([\d.]+)"[^>]*class="price-value-\d+"[^>]*>\s*([\s\S]*?)<\/span>/);
+    }
     if (priceMatch) {
       priceRaw = parseFloat(priceMatch[1]);
       const priceText = priceMatch[2].replace(/[^\d.,₹\s]/g, '').trim();
       price = priceText || `₹ ${priceRaw.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+    } else {
+      // Last resort: find MRP pattern anywhere in page
+      const mrpMatch = html.match(/MRP[:\s]*(?:&#x20B9;|₹)\s*([\d,]+(?:\.\d+)?)/i);
+      if (mrpMatch) {
+        priceRaw = parseFloat(mrpMatch[1].replace(/,/g, ''));
+        price = `₹ ${priceRaw.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+      }
     }
 
     res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=172800');
