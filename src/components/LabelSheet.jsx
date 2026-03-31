@@ -164,7 +164,7 @@ const LabelCell = memo(function LabelCell({ label }) {
       border: B, boxSizing: 'border-box',
       fontFamily: LABEL_FONT_FAMILY,
       color: '#000', display: 'flex',
-      overflow: 'hidden', background: '#fff',
+      background: '#fff',
       WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact',
     }}>
 
@@ -184,16 +184,16 @@ const LabelCell = memo(function LabelCell({ label }) {
         </span>
       </div>
 
-      {/* ── MAIN CONTENT — Flexbox column layout ── */}
+      {/* ── MAIN CONTENT — CSS Grid (html-to-image supports it natively) ── */}
       <div style={{
         flex: '1 1 auto',
-        display: 'flex', flexDirection: 'column',
+        display: 'grid',
+        gridTemplateRows: '8.5mm auto 1fr 7mm',
         minWidth: 0,
       }}>
 
-        {/* ROW 1: Brand Logo + QR Code — fixed 8.5mm ── */}
+        {/* ROW 1: Brand Logo + QR Code ── */}
         <div style={{
-          flex: '0 0 8.5mm',
           display: 'flex', alignItems: 'center',
           padding: '0.5mm 1.2mm',
           gap: '1.5mm',
@@ -224,9 +224,8 @@ const LabelCell = memo(function LabelCell({ label }) {
           )}
         </div>
 
-        {/* ROW 2: Size / Qty / MRP Table — auto height ── */}
+        {/* ROW 2: Size / Qty / MRP Table ── */}
         <div style={{
-          flex: '0 0 auto',
           borderTop: BD,
           padding: '0.3mm 1mm',
         }}>
@@ -256,11 +255,12 @@ const LabelCell = memo(function LabelCell({ label }) {
           </table>
         </div>
 
-        {/* ROW 3: Product Name + Description + Image — fills remaining space ── */}
+        {/* ROW 3: Product Name + Description + Image ── */}
         <div style={{
-          flex: '1 1 auto',
           borderTop: BD,
           display: 'flex',
+          overflow: 'hidden',
+          minHeight: 0,
         }}>
           {/* Text content */}
           <div style={{
@@ -314,7 +314,6 @@ const LabelCell = memo(function LabelCell({ label }) {
 
         {/* ROW 4: Footer — fixed 7mm ── */}
         <div style={{
-          flex: '0 0 7mm',
           borderTop: BD,
           padding: '0.6mm 1.2mm',
           fontSize: s(3.2), lineHeight: 1.3, color: '#000',

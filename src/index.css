@@ -38,6 +38,9 @@
   box-sizing: border-box !important;
   gap: 1mm !important;
 }
+.sheet > * {
+  overflow: hidden;
+}
 
 /* ─── Theme variables ─────────────────────────────── */
 :root {
