@@ -198,17 +198,17 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
             )}
           </div>
 
-          {/* Right: Product Image */}
+          {/* Right: Product Image — kept inside print margin */}
           {hasProductImg && (
             <div style={{
               flex: '0 0 auto', display: 'flex', alignItems: 'center',
               justifyContent: 'center', padding: '0.5mm',
-              borderLeft: BT, width: '14mm',
+              borderLeft: BT, width: '11mm', marginRight: '0.5mm',
             }}>
               <img src={productImageSrc} alt="Product"
                 onError={() => setImgError(true)}
                 style={{
-                  maxHeight: '100%', maxWidth: '13mm',
+                  maxHeight: '100%', maxWidth: '10mm',
                   objectFit: 'contain',
                 }} />
             </div>

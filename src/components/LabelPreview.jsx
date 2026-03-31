@@ -281,7 +281,7 @@ export default function LabelPreview({
           const midAvailH = footerY - curY - 0.6;
 
           // Product image on right side
-          const IMG_COL_W = prodImg ? 14 : 0;
+          const IMG_COL_W = prodImg ? 11 : 0;
           const textW = contentW - IMG_COL_W - (prodImg ? 1 : 0);
 
           if (prodImg) {
