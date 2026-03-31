@@ -78,7 +78,7 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
         width: '5.5mm', flexShrink: 0, borderRight: B,
         background: '#fff', color: '#000',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        overflow: 'hidden', position: 'relative',
+        position: 'relative',
       }}>
         <span style={{
           transform: 'rotate(-90deg)',
@@ -93,19 +93,18 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
       {/* ── MAIN CONTENT AREA ── */}
       <div style={{
         flex: '1 1 auto', display: 'flex', flexDirection: 'column',
-        overflow: 'hidden', minWidth: 0,
+        minWidth: 0, overflow: 'hidden',
       }}>
 
-        {/* ── TOP ROW: Brand Logo + QR Code (side by side, left) ── */}
+        {/* ── TOP ROW: Brand Logo + QR Code ── */}
         <div style={{
           display: 'flex', alignItems: 'center',
-          borderBottom: BT, padding: '0.5mm 1mm',
+          borderBottom: BT, padding: '0.8mm 1.2mm',
           minHeight: '8mm', flexShrink: 0, gap: '1.5mm',
+          position: 'relative', zIndex: 1,
         }}>
-          {/* Brand Logo — large, dark, bold */}
           <div style={{
             flex: '0 0 auto', display: 'flex', alignItems: 'center',
-            overflow: 'hidden',
           }}>
             {logoUrl && !logoError ? (
               <img src={logoUrl} alt={brand} crossOrigin="anonymous"
@@ -125,7 +124,6 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
             )}
           </div>
 
-          {/* QR Code — right next to logo */}
           {qrDataUrl && (
             <img src={qrDataUrl} alt="QR" style={{
               width: '7mm', height: '7mm',
@@ -138,6 +136,7 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
         <div style={{
           borderBottom: BT, flexShrink: 0,
           padding: '0.3mm 1mm',
+          position: 'relative', zIndex: 1,
         }}>
           <table style={{
             width: '100%', borderCollapse: 'collapse',
@@ -145,19 +144,19 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
           }}>
             <thead>
               <tr>
-                <th style={{ borderBottom: BT, borderRight: BT, padding: '0.4mm 0.5mm', fontWeight: 900, fontSize: s(4.5), verticalAlign: 'middle' }}>Size</th>
-                <th style={{ borderBottom: BT, borderRight: BT, padding: '0.4mm 0.5mm', fontWeight: 900, fontSize: s(4.5), verticalAlign: 'middle' }}>Qty</th>
-                <th style={{ borderBottom: BT, padding: '0.4mm 0.5mm', fontWeight: 900, fontSize: s(4.5), verticalAlign: 'middle' }}>MRP (Per Piece)</th>
+                <th style={{ borderBottom: BT, borderRight: BT, padding: '0.5mm 0.8mm', fontWeight: 900, fontSize: s(4.5), verticalAlign: 'middle' }}>Size</th>
+                <th style={{ borderBottom: BT, borderRight: BT, padding: '0.5mm 0.8mm', fontWeight: 900, fontSize: s(4.5), verticalAlign: 'middle' }}>Qty</th>
+                <th style={{ borderBottom: BT, padding: '0.5mm 0.8mm', fontWeight: 900, fontSize: s(4.5), verticalAlign: 'middle' }}>MRP (Per Piece)</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style={{ borderRight: BT, padding: '0.5mm 0.5mm', fontSize: s(5), verticalAlign: 'middle', height: '4mm' }}>{size || '—'}</td>
-                <td style={{ borderRight: BT, padding: '0.5mm 0.5mm', fontSize: s(5), verticalAlign: 'middle', height: '4mm' }}>{qty || '—'}</td>
-                <td style={{ padding: '0.3mm 0.5mm', fontWeight: 800, fontSize: s(5.5), verticalAlign: 'middle', height: '4mm' }}>
+                <td style={{ borderRight: BT, padding: '0.8mm', fontSize: s(5), verticalAlign: 'middle' }}>{size || '—'}</td>
+                <td style={{ borderRight: BT, padding: '0.8mm', fontSize: s(5), verticalAlign: 'middle' }}>{qty || '—'}</td>
+                <td style={{ padding: '0.5mm 0.8mm', fontWeight: 800, fontSize: s(5.5), verticalAlign: 'middle', lineHeight: 1.1 }}>
                   {price ? `\u20B9${price.replace(/^[\s₹Rs.]+/i, '').trim()}` : '—'}
                   {price && (
-                    <div style={{ fontSize: s(2.8), fontWeight: 400, marginTop: '0.2mm', lineHeight: 1 }}>(Incl. of All Taxes)</div>
+                    <div style={{ fontSize: s(2.8), fontWeight: 400, marginTop: '0.3mm', lineHeight: 1 }}>(Incl. of All Taxes)</div>
                   )}
                 </td>
               </tr>
@@ -167,19 +166,20 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
 
         {/* ── PRODUCT NAME + DESCRIPTION + PRODUCT IMAGE ── */}
         <div style={{
-          flex: '1 1 auto', display: 'flex', overflow: 'hidden',
+          flex: '1 1 auto', display: 'flex',
           borderBottom: BT, minHeight: 0,
+          position: 'relative', zIndex: 1, overflow: 'hidden',
         }}>
           {/* Left: Text content */}
           <div style={{
             flex: '1 1 auto', display: 'flex', flexDirection: 'column',
-            justifyContent: 'center', padding: '0.5mm 1.5mm',
-            overflow: 'hidden', minWidth: 0,
+            justifyContent: 'center', padding: '0.8mm 1.5mm',
+            minWidth: 0, overflow: 'hidden',
           }}>
             {product && (
               <span style={{
                 fontSize: s(5), fontWeight: 900,
-                textTransform: 'uppercase', lineHeight: 1.2,
+                textTransform: 'uppercase', lineHeight: 1.25,
                 display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
                 overflow: 'hidden', wordBreak: 'break-word',
               }}>
@@ -189,22 +189,22 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
             {(description || (!product && !isEmpty)) && (
               <span style={{
                 fontSize: s(3.8), fontWeight: 600,
-                lineHeight: 1.2, textTransform: 'uppercase',
-                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                lineHeight: 1.25, textTransform: 'uppercase',
+                display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
                 overflow: 'hidden', wordBreak: 'break-word',
-                marginTop: product ? '0.3mm' : 0,
+                marginTop: product ? '0.5mm' : 0,
               }}>
                 {description || ''}
               </span>
             )}
           </div>
 
-          {/* Right: Product Image — kept inside print margin */}
+          {/* Right: Product Image */}
           {hasProductImg && (
             <div style={{
               flex: '0 0 auto', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', padding: '0.5mm',
-              borderLeft: BT, width: '11mm', marginRight: '0.5mm',
+              justifyContent: 'center', padding: '0.8mm',
+              borderLeft: BT, width: '11mm',
             }}>
               <img src={productImageSrc} alt="Product"
                 onError={() => setImgError(true)}
@@ -216,11 +216,11 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
           )}
         </div>
 
-        {/* ── FOOTER — 3 lines: Company/India, Mfg date/Email, Phone ── */}
+        {/* ── FOOTER — Company/India, Mfg date/Email, Phone ── */}
         <div style={{
-          flexShrink: 0, padding: '0.4mm 1mm',
-          fontSize: s(3.2), lineHeight: 1.25, color: '#000',
-          fontWeight: 400, overflow: 'hidden',
+          flexShrink: 0, padding: '0.5mm 1.2mm',
+          fontSize: s(3.2), lineHeight: 1.3, color: '#000',
+          fontWeight: 400, position: 'relative', zIndex: 1,
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span>Jaquar & Co. Pvt. Ltd.</span>
