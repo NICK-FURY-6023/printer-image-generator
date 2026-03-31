@@ -228,7 +228,7 @@ const LabelCell = memo(function LabelCell({ label }) {
             <span>Made in India</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: s(2.8), color: '#333' }}>
-            <span>Mth/Yr of Mfg: {mfgDate || '___/____'}</span>
+            <span>Mfg: {mfgDate || '___/____'}</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3mm' }}>
               <svg width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle' }}>
                 <rect x="2" y="4" width="20" height="16" rx="2"/>
