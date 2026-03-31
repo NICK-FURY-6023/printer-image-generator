@@ -146,19 +146,19 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
           }}>
             <thead>
               <tr>
-                <th style={{ borderBottom: BT, borderRight: BT, padding: '0.3mm 0.5mm', fontWeight: 900, fontSize: s(4.5) }}>Size</th>
-                <th style={{ borderBottom: BT, borderRight: BT, padding: '0.3mm 0.5mm', fontWeight: 900, fontSize: s(4.5) }}>Qty</th>
-                <th style={{ borderBottom: BT, padding: '0.3mm 0.5mm', fontWeight: 900, fontSize: s(4.5) }}>MRP (Per Piece)</th>
+                <th style={{ borderBottom: BT, borderRight: BT, padding: '0.4mm 0.5mm', fontWeight: 900, fontSize: s(4.5), verticalAlign: 'middle' }}>Size</th>
+                <th style={{ borderBottom: BT, borderRight: BT, padding: '0.4mm 0.5mm', fontWeight: 900, fontSize: s(4.5), verticalAlign: 'middle' }}>Qty</th>
+                <th style={{ borderBottom: BT, padding: '0.4mm 0.5mm', fontWeight: 900, fontSize: s(4.5), verticalAlign: 'middle' }}>MRP (Per Piece)</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style={{ borderRight: BT, padding: '0.3mm 0.5mm', fontSize: s(5) }}>{size || '—'}</td>
-                <td style={{ borderRight: BT, padding: '0.3mm 0.5mm', fontSize: s(5) }}>{qty || '—'}</td>
-                <td style={{ padding: '0.3mm 0.5mm', fontWeight: 800, fontSize: s(5.5) }}>
+                <td style={{ borderRight: BT, padding: '0.5mm 0.5mm', fontSize: s(5), verticalAlign: 'middle', height: '4mm' }}>{size || '—'}</td>
+                <td style={{ borderRight: BT, padding: '0.5mm 0.5mm', fontSize: s(5), verticalAlign: 'middle', height: '4mm' }}>{qty || '—'}</td>
+                <td style={{ padding: '0.3mm 0.5mm', fontWeight: 800, fontSize: s(5.5), verticalAlign: 'middle', height: '4mm' }}>
                   {price ? `\u20B9${price}` : '—'}
                   {price && (
-                    <div style={{ fontSize: s(3), fontWeight: 400, marginTop: '0.1mm' }}>(Incl. of All Taxes)</div>
+                    <div style={{ fontSize: s(2.8), fontWeight: 400, marginTop: '0.2mm', lineHeight: 1 }}>(Incl. of All Taxes)</div>
                   )}
                 </td>
               </tr>

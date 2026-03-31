@@ -241,7 +241,9 @@ export default function LabelPreview({
           curY += 0.3;
 
           // ── TABLE: Size | Qty | MRP ──
-          const TABLE_H = 5.5;
+          const HDR_H = 2.5;  // header row height
+          const DATA_H = 4;   // data row height (taller for MRP + subtext)
+          const TABLE_H = HDR_H + DATA_H;
           const tblX = contentX;
           const tblW = contentW;
           const col1W = tblW * 0.28, col2W = tblW * 0.22, col3W = tblW * 0.50;
@@ -249,42 +251,51 @@ export default function LabelPreview({
           // Header row (white bg, bordered)
           pdf.setDrawColor(0);
           pdf.setLineWidth(0.12);
-          pdf.rect(tblX, curY, tblW, TABLE_H / 2);
-          pdf.line(tblX + col1W, curY, tblX + col1W, curY + TABLE_H / 2);
-          pdf.line(tblX + col1W + col2W, curY, tblX + col1W + col2W, curY + TABLE_H / 2);
+          pdf.rect(tblX, curY, tblW, HDR_H);
+          pdf.line(tblX + col1W, curY, tblX + col1W, curY + HDR_H);
+          pdf.line(tblX + col1W + col2W, curY, tblX + col1W + col2W, curY + HDR_H);
           pdf.setTextColor(0, 0, 0);
           pdf.setFontSize(s(4));
           pdf.setFont('helvetica', 'bold');
-          pdf.text('Size', tblX + col1W / 2, curY + TABLE_H / 4 + 0.3, { align: 'center' });
-          pdf.text('Qty', tblX + col1W + col2W / 2, curY + TABLE_H / 4 + 0.3, { align: 'center' });
-          pdf.text('MRP (Per Piece)', tblX + col1W + col2W + col3W / 2, curY + TABLE_H / 4 + 0.3, { align: 'center' });
+          const hdrMid = curY + HDR_H / 2 + 0.4;
+          pdf.text('Size', tblX + col1W / 2, hdrMid, { align: 'center' });
+          pdf.text('Qty', tblX + col1W + col2W / 2, hdrMid, { align: 'center' });
+          pdf.text('MRP (Per Piece)', tblX + col1W + col2W + col3W / 2, hdrMid, { align: 'center' });
           pdf.setTextColor(0, 0, 0);
 
           // Data row
-          const dataY = curY + TABLE_H / 2;
+          const dataY = curY + HDR_H;
           pdf.setDrawColor(0);
           pdf.setLineWidth(0.12);
-          pdf.rect(tblX, dataY, tblW, TABLE_H / 2);
-          pdf.line(tblX + col1W, dataY, tblX + col1W, dataY + TABLE_H / 2);
-          pdf.line(tblX + col1W + col2W, dataY, tblX + col1W + col2W, dataY + TABLE_H / 2);
+          pdf.rect(tblX, dataY, tblW, DATA_H);
+          pdf.line(tblX + col1W, dataY, tblX + col1W, dataY + DATA_H);
+          pdf.line(tblX + col1W + col2W, dataY, tblX + col1W + col2W, dataY + DATA_H);
 
-          pdf.setFontSize(s(4.5));
-          pdf.setFont('helvetica', 'normal');
           const sizeVal = label.size?.trim() || '—';
           const qtyVal = label.qty?.trim() || '—';
           const priceVal = label.price?.trim() ? `\u20B9${label.price.trim()}` : '—';
-          // Truncate table values to fit column widths
           const fitText = (txt, maxW) => { const t = pdf.splitTextToSize(txt, maxW - 0.6); return t[0] || txt; };
-          pdf.text(fitText(sizeVal, col1W), tblX + col1W / 2, dataY + TABLE_H / 4, { align: 'center' });
-          pdf.text(fitText(qtyVal, col2W), tblX + col1W + col2W / 2, dataY + TABLE_H / 4, { align: 'center' });
-          pdf.setFont('helvetica', 'bold');
-          pdf.text(fitText(priceVal, col3W), tblX + col1W + col2W + col3W / 2, dataY + TABLE_H / 4, { align: 'center' });
 
-          // "(Incl. of All Taxes)" below the MRP amount
+          // Size & Qty — vertically centered in data row
+          pdf.setFontSize(s(4.5));
+          pdf.setFont('helvetica', 'normal');
+          const dataMid = dataY + DATA_H / 2 + 0.4;
+          pdf.text(fitText(sizeVal, col1W), tblX + col1W / 2, dataMid, { align: 'center' });
+          pdf.text(fitText(qtyVal, col2W), tblX + col1W + col2W / 2, dataMid, { align: 'center' });
+
+          // MRP — price + subtext both centered inside cell
+          const mrpCenterX = tblX + col1W + col2W + col3W / 2;
           if (label.price?.trim()) {
-            pdf.setFontSize(s(2.5));
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(s(4.5));
+            pdf.text(fitText(priceVal, col3W), mrpCenterX, dataY + DATA_H * 0.35 + 0.3, { align: 'center' });
+            pdf.setFontSize(s(2.2));
             pdf.setFont('helvetica', 'normal');
-            pdf.text('(Incl. of All Taxes)', tblX + col1W + col2W + col3W / 2, dataY + TABLE_H / 4 + 1.8, { align: 'center' });
+            pdf.text('(Incl. of All Taxes)', mrpCenterX, dataY + DATA_H * 0.35 + 1.9, { align: 'center' });
+          } else {
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(s(4.5));
+            pdf.text('—', mrpCenterX, dataMid, { align: 'center' });
           }
 
           curY += TABLE_H + 0.5;
