@@ -1,11 +1,16 @@
 /*
- * Clean product label — 105mm × 48mm
- * ┌────────┬─────────────────────────────────────┬──────┐
- * │        │ Product Code  :  ALD-CHR-055N        │      │
- * │ [LOGO] │ Product Name  :  CONCEALED BODY DIV  │ [QR] │
- * │        │ Product Desc  :  High quality brass.. │      │
- * │        │ Product Price :  ₹ 3,800.00          │      │
- * └────────┴─────────────────────────────────────┴──────┘
+ * Hardware product label — 105mm × 48mm (Jaquar-type packaging sticker)
+ * ┌───┬──────────────────────────────────────────┐
+ * │   │ [BRAND LOGO]              [QR CODE]      │
+ * │ M │──────────────────────────────────────────│
+ * │ O │ │  Size  │  Qty  │  MRP (Per Piece)  │  │
+ * │ D │ │  15mm  │   1   │     ₹3,800.00     │  │
+ * │ E │──────────────────────────────────────────│
+ * │ L │ CONCEALED BODY FOR SINGLE LEVER HIGH     │
+ * │   │ FLOW DIVERTER WITH BUTTON ASSEMBLY...    │
+ * │   │──────────────────────────────────────────│
+ * │   │ Mfg by: Company  |  Address: India       │
+ * └───┴──────────────────────────────────────────┘
  */
 
 import { useState, useEffect, memo } from 'react';
@@ -36,15 +41,17 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
   const product = label.product?.trim() || '';
   const description = label.description?.trim() || '';
   const price = label.price?.trim() || '';
+  const size = label.size?.trim() || '';
+  const qty = label.qty?.trim() || '';
   const logoUrl = label.logoUrl?.trim() || '/jaquar-logo.png';
   const productUrl = label.productUrl?.trim() || '';
   const qrDataUrl = useQRCode(productUrl);
-  const fs = fieldStyles || {};
   const s = (pt) => `${pt * fontScale}pt`;
-  const sf = (pt, field) => `${pt * fontScale * (fs[field]?.size || 1)}pt`;
-  const wf = (base, field) => Math.min(950, Math.round(base * (fs[field]?.bold || 1)));
-  const B = '0.2mm solid #222';
+  const B = '0.2mm solid #000';
+  const BT = '0.15mm solid #000';
   const [logoError, setLogoError] = useState(false);
+
+  const isEmpty = !code && !product && !price && !description;
 
   return (
     <div style={{
@@ -52,103 +59,135 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
       border: B, boxSizing: 'border-box',
       fontFamily: 'Arial, Helvetica, sans-serif',
       color: '#000', display: 'flex',
-      overflow: 'hidden',
+      overflow: 'hidden', background: '#fff',
       WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact',
     }}>
 
-      {/* ── LEFT — Brand Logo ── */}
+      {/* ── LEFT VERTICAL STRIP — Model Number (rotated 90°) ── */}
       <div style={{
-        width: '18mm', flexShrink: 0, borderRight: B,
+        width: '7mm', flexShrink: 0, borderRight: B,
+        background: '#000', color: '#fff',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '1.5mm 1.5mm 1.5mm 3mm', overflow: 'hidden',
+        overflow: 'hidden', position: 'relative',
       }}>
-        {logoUrl && !logoError ? (
-          <img src={logoUrl} alt={brand} crossOrigin="anonymous" onError={() => setLogoError(true)} style={{
-            maxWidth: '95%', maxHeight: '95%',
-            objectFit: 'contain',
-          }} />
-        ) : (
-          <span style={{
-            fontSize: s(10), fontWeight: 700, fontStyle: 'italic',
-            fontFamily: 'Georgia, "Times New Roman", serif',
-            textAlign: 'center', wordBreak: 'break-word',
-            lineHeight: 1.1,
-          }}>
-            {brand || <span style={{ color: '#ccc', fontStyle: 'normal', fontWeight: 400, fontSize: s(7) }}>Brand</span>}
-          </span>
-        )}
+        <span style={{
+          transform: 'rotate(-90deg)',
+          whiteSpace: 'nowrap',
+          fontSize: s(7), fontWeight: 900,
+          letterSpacing: '0.08em',
+        }}>
+          {code || (isEmpty ? '' : 'MODEL')}
+        </span>
       </div>
 
-      {/* ── CENTER — Product Details ── */}
+      {/* ── MAIN CONTENT AREA ── */}
       <div style={{
         flex: '1 1 auto', display: 'flex', flexDirection: 'column',
-        justifyContent: 'center', padding: '1mm 2mm',
-        overflow: 'hidden', minWidth: 0, gap: '0.6mm',
+        overflow: 'hidden', minWidth: 0,
       }}>
-        {code && (
-          <div style={{ display: 'flex', alignItems: 'baseline', fontSize: sf(7, 'code'), lineHeight: 1.3, flexShrink: 0 }}>
-            <span style={{ fontWeight: wf(900, 'code'), flexShrink: 0, minWidth: '16mm' }}>Product Code</span>
-            <span style={{ fontWeight: wf(900, 'code'), flexShrink: 0, margin: '0 0.5mm' }}>:</span>
-            <span style={{ fontWeight: wf(800, 'code'), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{code}</span>
-          </div>
-        )}
 
-        {product && (
-          <div style={{ display: 'flex', alignItems: 'flex-start', fontSize: sf(6.5, 'name'), lineHeight: 1.3, flexShrink: 0 }}>
-            <span style={{ fontWeight: wf(900, 'name'), flexShrink: 0, minWidth: '16mm', fontSize: sf(7, 'name') }}>Product Name</span>
-            <span style={{ fontWeight: wf(900, 'name'), flexShrink: 0, margin: '0 0.5mm', fontSize: sf(7, 'name') }}>:</span>
-            <span style={{
-              fontWeight: wf(700, 'name'), textTransform: 'uppercase', wordBreak: 'break-word',
-              display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}>
-              {product}
-            </span>
-          </div>
-        )}
-
-        {description && (
-          <div style={{ display: 'flex', alignItems: 'flex-start', fontSize: sf(5.5, 'desc'), lineHeight: 1.3, flexShrink: 0 }}>
-            <span style={{ fontWeight: wf(900, 'desc'), flexShrink: 0, minWidth: '16mm', fontSize: sf(7, 'desc') }}>Product Desc</span>
-            <span style={{ fontWeight: wf(900, 'desc'), flexShrink: 0, margin: '0 0.5mm', fontSize: sf(7, 'desc') }}>:</span>
-            <span style={{
-              fontWeight: wf(600, 'desc'), wordBreak: 'break-word',
-              display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}>
-              {description}
-            </span>
-          </div>
-        )}
-
-        {price && (
-          <div style={{ display: 'flex', alignItems: 'baseline', fontSize: sf(7, 'price'), lineHeight: 1.3, flexShrink: 0 }}>
-            <span style={{ fontWeight: wf(900, 'price'), flexShrink: 0, minWidth: '16mm' }}>Product Price</span>
-            <span style={{ fontWeight: wf(900, 'price'), flexShrink: 0, margin: '0 0.5mm' }}>:</span>
-            <span style={{ fontWeight: wf(900, 'price'), fontSize: sf(8, 'price') }}>
-              {`\u20B9 ${price}`}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* ── RIGHT — QR Code (only if product URL exists) ── */}
-      {qrDataUrl && (
+        {/* ── TOP ROW: Brand Logo (left) + QR Code (right) ── */}
         <div style={{
-          width: '13mm', flexShrink: 0, borderLeft: B,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '1.5mm', overflow: 'hidden',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          borderBottom: BT, padding: '1mm 1.5mm',
+          minHeight: '11mm', flexShrink: 0,
         }}>
-          <img src={qrDataUrl} alt="QR" style={{
-            width: '100%', maxHeight: '100%',
-            objectFit: 'contain',
-          }} />
-        </div>
-      )}
+          {/* Brand Logo */}
+          <div style={{
+            flex: '0 0 auto', display: 'flex', alignItems: 'center',
+            maxWidth: '55%', overflow: 'hidden',
+          }}>
+            {logoUrl && !logoError ? (
+              <img src={logoUrl} alt={brand} crossOrigin="anonymous"
+                onError={() => setLogoError(true)}
+                style={{
+                  maxHeight: '9mm', maxWidth: '26mm',
+                  objectFit: 'contain',
+                  filter: 'grayscale(100%) contrast(1.5)',
+                }} />
+            ) : (
+              <span style={{
+                fontSize: s(12), fontWeight: 900,
+                letterSpacing: '0.15em', textTransform: 'uppercase',
+              }}>
+                {brand || (isEmpty ? '' : 'BRAND')}
+              </span>
+            )}
+          </div>
 
+          {/* QR Code */}
+          {qrDataUrl && (
+            <div style={{
+              flex: '0 0 auto', display: 'flex', alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <img src={qrDataUrl} alt="QR" style={{
+                width: '9mm', height: '9mm',
+                objectFit: 'contain',
+              }} />
+            </div>
+          )}
+        </div>
+
+        {/* ── MIDDLE: Size / Qty / MRP Table ── */}
+        <div style={{
+          borderBottom: BT, flexShrink: 0,
+          padding: '0.5mm 1.5mm',
+        }}>
+          <table style={{
+            width: '100%', borderCollapse: 'collapse',
+            fontSize: s(6), textAlign: 'center',
+          }}>
+            <thead>
+              <tr>
+                <th style={{ borderBottom: BT, borderRight: BT, padding: '0.5mm 1mm', fontWeight: 900, fontSize: s(5.5) }}>Size</th>
+                <th style={{ borderBottom: BT, borderRight: BT, padding: '0.5mm 1mm', fontWeight: 900, fontSize: s(5.5) }}>Qty</th>
+                <th style={{ borderBottom: BT, padding: '0.5mm 1mm', fontWeight: 900, fontSize: s(5.5) }}>MRP (Per Piece)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ borderRight: BT, padding: '0.5mm 1mm', fontSize: s(6) }}>{size || '—'}</td>
+                <td style={{ borderRight: BT, padding: '0.5mm 1mm', fontSize: s(6) }}>{qty || '—'}</td>
+                <td style={{ padding: '0.5mm 1mm', fontWeight: 800, fontSize: s(6.5) }}>
+                  {price ? `\u20B9${price}` : '—'}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* ── PRODUCT DESCRIPTION — Center, ALL CAPS ── */}
+        <div style={{
+          flex: '1 1 auto', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          borderBottom: BT, padding: '0.5mm 2mm',
+          overflow: 'hidden', textAlign: 'center',
+        }}>
+          <span style={{
+            fontSize: s(5), fontWeight: 700,
+            lineHeight: 1.3, textTransform: 'uppercase',
+            display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
+            overflow: 'hidden', wordBreak: 'break-word',
+          }}>
+            {description || product || ''}
+          </span>
+        </div>
+
+        {/* ── FOOTER — Manufacturer + Address ── */}
+        <div style={{
+          flexShrink: 0, padding: '0.5mm 1.5mm',
+          fontSize: s(3.8), lineHeight: 1.3, color: '#000',
+          display: 'flex', flexDirection: 'column', gap: '0.2mm',
+        }}>
+          {brand && (
+            <span><strong>Manufactured by:</strong> {brand}</span>
+          )}
+          <span><strong>Address:</strong> India</span>
+        </div>
+
+      </div>
     </div>
   );
-// Bug #12 fix: custom comparator so memo actually prevents re-renders
 }, (prev, next) =>
   prev.fontScale === next.fontScale &&
   prev.fieldStyles === next.fieldStyles &&
@@ -156,13 +195,15 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
   prev.label.product === next.label.product &&
   prev.label.description === next.label.description &&
   prev.label.price === next.label.price &&
+  prev.label.size === next.label.size &&
+  prev.label.qty === next.label.qty &&
   prev.label.logoUrl === next.label.logoUrl &&
   prev.label.manufacturer === next.label.manufacturer &&
   prev.label.productUrl === next.label.productUrl
 );
 
 // Bug #4 fix: proper default label so .trim() never hits undefined
-const defaultLabel = { product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '' };
+const defaultLabel = { product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '', size: '', qty: '' };
 
 export default function LabelSheet({ labels, extraTopMargin = 0, fontScale = 1, fieldStyles }) {
   const safeLabels = Array.from({ length: 12 }, (_, i) => ({ ...defaultLabel, ...(labels[i] || {}) }));

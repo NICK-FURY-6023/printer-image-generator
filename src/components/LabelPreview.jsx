@@ -86,9 +86,8 @@ export default function LabelPreview({
       const PY_TOP = 7 + printMargin, PY_BOT = 7 - printMargin;
       const CW = (210 - PX * 2 - GAP) / 2;
       const CH = (297 - PY_TOP - PY_BOT - GAP * 5) / 6;
-      const LOGO_W = 18, QR_W = 13;
+      const LOGO_W = 18;
       const s = (pt) => pt * fontScale;
-      const sf = (pt, field) => pt * fontScale * (fieldStyles?.[field]?.size || 1);
       const PT2MM = 0.3528;
 
       // ── Pre-load images ──
@@ -150,95 +149,134 @@ export default function LabelPreview({
           const cy = PY_TOP + row * (CH + GAP);
 
           // Cell border
-          pdf.setDrawColor(34, 34, 34);
+          pdf.setDrawColor(0, 0, 0);
           pdf.setLineWidth(0.2);
           pdf.rect(cx, cy, CW, CH);
 
-          // ── Logo section ──
-          pdf.line(cx + LOGO_W, cy, cx + LOGO_W, cy + CH);
+          // ── LEFT VERTICAL STRIP — black with white rotated model number ──
+          const STRIP_W = 7;
+          pdf.setFillColor(0, 0, 0);
+          pdf.rect(cx, cy, STRIP_W, CH, 'F');
+          pdf.line(cx + STRIP_W, cy, cx + STRIP_W, cy + CH);
+
+          const code = label.code?.trim() || '';
+          if (code) {
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(s(7));
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(code, cx + STRIP_W / 2, cy + CH / 2, { angle: 90, align: 'center' });
+            pdf.setTextColor(0, 0, 0);
+          }
+
+          // Content area after the strip
+          const contentX = cx + STRIP_W + 1;
+          const contentW = CW - STRIP_W - 2;
+          let curY = cy + 1;
+
+          // ── TOP ROW: Brand Logo (left) + QR Code (right) ──
+          const TOP_H = 10;
           const logoUrl = label.logoUrl?.trim() || '/jaquar-logo.png';
           const logo = logoCache[logoUrl];
           if (logo) {
-            const pad = 2;
-            const fit = fitImg(logo, LOGO_W - pad * 2, CH - pad * 2);
+            const pad = 1;
+            const fit = fitImg(logo, 22, TOP_H - pad * 2);
             try {
               pdf.addImage(logo.data, 'PNG',
-                cx + (LOGO_W - fit.w) / 2, cy + (CH - fit.h) / 2, fit.w, fit.h);
+                contentX, curY + (TOP_H - fit.h) / 2, fit.w, fit.h);
             } catch { /* skip */ }
           } else {
-            // Fallback: brand name text
             const brand = label.manufacturer?.trim();
             if (brand) {
-              pdf.setFontSize(s(8));
-              pdf.setFont('helvetica', 'bolditalic');
-              pdf.text(brand, cx + LOGO_W / 2, cy + CH / 2, { align: 'center', maxWidth: LOGO_W - 2 });
+              pdf.setFontSize(s(10));
+              pdf.setFont('helvetica', 'bold');
+              pdf.text(brand.toUpperCase(), contentX + 1, curY + TOP_H / 2 + 1);
             }
           }
 
-          // ── QR code section ──
+          // QR code on right
           const pUrl = label.productUrl?.trim();
           const qrData = pUrl ? qrCache[pUrl] : null;
           if (qrData) {
-            pdf.line(cx + CW - QR_W, cy, cx + CW - QR_W, cy + CH);
-            const qrPad = 2;
-            const qrSize = Math.min(QR_W - qrPad * 2, CH - qrPad * 2);
+            const qrSize = TOP_H - 2;
             try {
               pdf.addImage(qrData, 'PNG',
-                cx + CW - QR_W + (QR_W - qrSize) / 2, cy + (CH - qrSize) / 2, qrSize, qrSize);
+                contentX + contentW - qrSize, curY + 1, qrSize, qrSize);
             } catch { /* skip */ }
           }
 
-          // ── Text section ──
-          const txtPad = 2;
-          const txtX = cx + LOGO_W + txtPad;
-          const txtEndX = cx + CW - (qrData ? QR_W : 0) - 1;
-          const txtW = txtEndX - txtX;
-          const LBL_W = 16;
-          const valX = txtX + LBL_W + 1;
-          const valW = txtW - LBL_W - 1;
+          curY += TOP_H;
+          // Separator line
+          pdf.setLineWidth(0.15);
+          pdf.line(contentX - 1, curY, cx + CW, curY);
+          curY += 0.5;
 
-          const code = label.code?.trim() || '';
-          const product = label.product?.trim() || '';
-          const desc = label.description?.trim() || '';
-          const price = label.price?.trim() || '';
+          // ── TABLE: Size | Qty | MRP ──
+          const TABLE_H = 7;
+          const tblX = contentX;
+          const tblW = contentW;
+          const col1W = tblW * 0.28, col2W = tblW * 0.22, col3W = tblW * 0.50;
 
-          const textRows = [];
-          if (code)    textRows.push({ lbl: 'Product Code',  val: code,                 lblS: sf(6, 'code'),  valS: sf(6, 'code'),   vBold: true,  max: 1 });
-          if (product) textRows.push({ lbl: 'Product Name',  val: product.toUpperCase(), lblS: sf(6, 'name'),  valS: sf(5.5, 'name'), vBold: true,  max: 2 });
-          if (desc)    textRows.push({ lbl: 'Product Desc',  val: desc,                  lblS: sf(6, 'desc'),  valS: sf(5, 'desc'),   vBold: true,  max: 2 });
-          if (price)   textRows.push({ lbl: 'Product Price', val: `Rs. ${price}`,        lblS: sf(6, 'price'), valS: sf(7, 'price'),  vBold: true,  max: 1 });
+          // Header row (black bg)
+          pdf.setFillColor(0, 0, 0);
+          pdf.rect(tblX, curY, tblW, TABLE_H / 2, 'F');
+          pdf.setTextColor(255, 255, 255);
+          pdf.setFontSize(s(5));
+          pdf.setFont('helvetica', 'bold');
+          pdf.text('Size', tblX + col1W / 2, curY + TABLE_H / 4 + 0.5, { align: 'center' });
+          pdf.text('Qty', tblX + col1W + col2W / 2, curY + TABLE_H / 4 + 0.5, { align: 'center' });
+          pdf.text('MRP (Per Piece)', tblX + col1W + col2W + col3W / 2, curY + TABLE_H / 4 + 0.5, { align: 'center' });
+          pdf.setTextColor(0, 0, 0);
 
-          if (textRows.length === 0) continue;
+          // Data row
+          const dataY = curY + TABLE_H / 2;
+          pdf.setDrawColor(0);
+          pdf.setLineWidth(0.15);
+          pdf.rect(tblX, dataY, tblW, TABLE_H / 2);
+          pdf.line(tblX + col1W, dataY, tblX + col1W, dataY + TABLE_H / 2);
+          pdf.line(tblX + col1W + col2W, dataY, tblX + col1W + col2W, dataY + TABLE_H / 2);
 
-          // Compute line heights and wrapped text
-          const rowGap = 0.8;
-          let totalH = 0;
-          const comp = textRows.map(r => {
-            pdf.setFontSize(r.valS);
-            pdf.setFont('helvetica', r.vBold ? 'bold' : 'normal');
-            const lines = pdf.splitTextToSize(r.val, valW).slice(0, r.max);
-            const lineH = r.valS * PT2MM * 1.3;
-            const rowH = lineH * lines.length;
-            totalH += rowH;
-            return { ...r, lines, rowH, lineH };
-          });
-          totalH += rowGap * (comp.length - 1);
+          pdf.setFontSize(s(5.5));
+          pdf.setFont('helvetica', 'normal');
+          const sizeVal = label.size?.trim() || '—';
+          const qtyVal = label.qty?.trim() || '—';
+          const priceVal = label.price?.trim() ? `\u20B9${label.price.trim()}` : '—';
+          pdf.text(sizeVal, tblX + col1W / 2, dataY + TABLE_H / 4 + 0.5, { align: 'center' });
+          pdf.text(qtyVal, tblX + col1W + col2W / 2, dataY + TABLE_H / 4 + 0.5, { align: 'center' });
+          pdf.setFont('helvetica', 'bold');
+          pdf.text(priceVal, tblX + col1W + col2W + col3W / 2, dataY + TABLE_H / 4 + 0.5, { align: 'center' });
 
-          // Vertically center text block in cell
-          let ty = cy + (CH - totalH) / 2 + comp[0].lineH * 0.75;
+          curY += TABLE_H + 0.5;
+          pdf.setLineWidth(0.15);
+          pdf.line(contentX - 1, curY, cx + CW, curY);
+          curY += 0.5;
 
-          for (const r of comp) {
-            // Label (bold)
-            pdf.setFontSize(r.lblS);
+          // ── PRODUCT DESCRIPTION — centered, ALL CAPS ──
+          const desc = label.description?.trim() || label.product?.trim() || '';
+          if (desc) {
+            pdf.setFontSize(s(4.5));
             pdf.setFont('helvetica', 'bold');
-            pdf.text(r.lbl, txtX, ty);
-            pdf.text(':', txtX + LBL_W - 0.5, ty);
-            // Value
-            pdf.setFontSize(r.valS);
-            pdf.setFont('helvetica', r.vBold ? 'bold' : 'normal');
-            pdf.text(r.lines, valX, ty);
-            ty += r.rowH + rowGap;
+            const descLines = pdf.splitTextToSize(desc.toUpperCase(), contentW - 2);
+            const maxLines = 3;
+            const lines = descLines.slice(0, maxLines);
+            const lineH = s(4.5) * PT2MM * 1.3;
+            const descBlockH = lines.length * lineH;
+            const availH = (cy + CH) - curY - 5;
+            const descY = curY + Math.max(0, (availH - descBlockH) / 2);
+            pdf.text(lines, contentX + contentW / 2, descY, { align: 'center', lineHeightFactor: 1.3 });
+            curY += Math.max(descBlockH, availH) + 0.5;
           }
+
+          // ── FOOTER — Manufacturer + Address ──
+          const footerY = cy + CH - 3.5;
+          pdf.setLineWidth(0.1);
+          pdf.line(contentX - 1, footerY - 0.5, cx + CW, footerY - 0.5);
+          pdf.setFontSize(s(3.5));
+          pdf.setFont('helvetica', 'normal');
+          const brand = label.manufacturer?.trim();
+          if (brand) {
+            pdf.text(`Manufactured by: ${brand}`, contentX, footerY + 1);
+          }
+          pdf.text('Address: India', contentX, footerY + 3);
         }
         } // end pageIdx loop
       }

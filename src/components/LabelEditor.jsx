@@ -3,10 +3,12 @@ import React, { useState, useRef, useEffect } from 'react';
 const FIELDS = [
   { key: 'manufacturer', label: 'Brand Name',          placeholder: 'e.g. Jaquar',                          span: 2 },
   { key: 'logoUrl',      label: 'Brand Logo URL',      placeholder: 'Paste logo image URL',                 span: 2 },
-  { key: 'code',         label: 'Product Code',        placeholder: 'e.g. FUS-CHR-29023B',                   span: 1, searchable: true },
-  { key: 'price',        label: 'Product Price (₹)',   placeholder: 'e.g. 3800.00',                         span: 1 },
+  { key: 'code',         label: 'Model / Product Code', placeholder: 'e.g. ALD-CHR-079N',                   span: 1, searchable: true },
+  { key: 'price',        label: 'MRP (₹ Per Piece)',   placeholder: 'e.g. 3,800.00',                        span: 1 },
+  { key: 'size',         label: 'Size',                placeholder: 'e.g. 15mm (1/2")',                      span: 1 },
+  { key: 'qty',          label: 'Qty',                 placeholder: 'e.g. 1',                                span: 1 },
   { key: 'product',      label: 'Product Name',        placeholder: 'e.g. Concealed Body Diverter',         span: 2, searchable: true },
-  { key: 'description',  label: 'Product Description', placeholder: 'e.g. High quality brass body diverter', span: 2 },
+  { key: 'description',  label: 'Product Description', placeholder: 'e.g. CONCEALED BODY FOR SINGLE LEVER HIGH FLOW DIVERTER...', span: 2 },
 ];
 
 /* ── Jaquar Search helpers ── */
@@ -163,7 +165,7 @@ function JaquarSearchDropdown({ results, loading, liveLoading, onSelect, visible
 }
 
 const emptyLabel = () => ({
-  product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '',
+  product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '', size: '', qty: '',
 });
 const isFilled   = (l) => !!(l.product?.trim() || l.code?.trim() || l.price?.trim());
 
