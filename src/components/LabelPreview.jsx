@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
+import { generateMfgDate } from '../utils/mfgDate';
 import LabelSheet from './LabelSheet';
 
 const A4_W = 794;
@@ -105,7 +106,7 @@ export default function LabelPreview({
           const img = new Image();
           img.crossOrigin = 'anonymous';
           img.src = proxyUrl(url);
-          await new Promise((r, e) => { img.onload = r; img.onerror = e; });
+          await new Promise((r, e) => { img.onload = r; img.onerror = () => e(new Error('load failed')); });
           const c = document.createElement('canvas');
           c.width = img.naturalWidth; c.height = img.naturalHeight;
           c.getContext('2d').drawImage(img, 0, 0);
@@ -153,7 +154,8 @@ export default function LabelPreview({
         for (let pageIdx = 0; pageIdx < allPages.length; pageIdx++) {
           if (!isFirstPage) pdf.addPage();
           isFirstPage = false;
-          const safeLabels = Array.from({ length: 12 }, (_, i) => allPages[pageIdx][i] || {});
+          const page = Array.isArray(allPages[pageIdx]) ? allPages[pageIdx] : [];
+          const safeLabels = Array.from({ length: 12 }, (_, i) => page[i] || {});
 
         for (let idx = 0; idx < 12; idx++) {
           const label = safeLabels[idx];
@@ -333,13 +335,7 @@ export default function LabelPreview({
           // Line 2: Mfg date + Email
           pdf.setFontSize(s(2.5));
           pdf.setTextColor(50, 50, 50);
-          const mfgDateRaw = label.mfgDate?.trim() || '';
-          const mfgDate = mfgDateRaw || (() => {
-            const now = new Date();
-            const off = Math.floor(Math.random() * 3) + 3;
-            const d = new Date(now.getFullYear(), now.getMonth() - off, 1);
-            return `${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-          })();
+          const mfgDate = label.mfgDate?.trim() || generateMfgDate();
           pdf.text(`Mth/Yr of Mfg: ${mfgDate}`, contentX, footerTop + 3.3);
           pdf.text('service@jaquar.com', contentX + contentW, footerTop + 3.3, { align: 'right' });
 

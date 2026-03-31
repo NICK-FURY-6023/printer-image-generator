@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { generateMfgDate } from '../utils/mfgDate';
 
 const FIELDS = [
   { key: 'manufacturer', label: 'Brand Name',          placeholder: 'e.g. Jaquar',                          span: 2 },
@@ -164,13 +165,6 @@ function JaquarSearchDropdown({ results, loading, liveLoading, onSelect, visible
       )}
     </div>
   );
-}
-
-function generateMfgDate() {
-  const now = new Date();
-  const offset = Math.floor(Math.random() * 3) + 3;
-  const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
-  return `${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
 }
 
 const emptyLabel = () => ({

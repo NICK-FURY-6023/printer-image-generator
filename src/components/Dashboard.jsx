@@ -5,16 +5,10 @@ import { useTheme } from '../contexts/ThemeContext';
 import toast from 'react-hot-toast';
 import { getTemplates } from '../services/api';
 import { getSupabaseClient } from '../services/supabase';
+import { generateMfgDate } from '../utils/mfgDate';
 import LabelEditor from './LabelEditor';
 import LabelPreview from './LabelPreview';
 import TemplateManager from './TemplateManager';
-
-function generateMfgDate() {
-  const now = new Date();
-  const offset = Math.floor(Math.random() * 3) + 3;
-  const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
-  return `${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-}
 
 const emptyLabel = () => ({
   product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '', productImage: '', size: '', qty: '', mfgDate: generateMfgDate(),
@@ -82,7 +76,9 @@ function CSVImportModal({ onImport, onClose }) {
     if (lines.length < 2) return { error: 'CSV must have a header row and at least 1 data row.' };
     const header = lines[0].split(',').map(h => h.trim().toLowerCase());
     const missing = CSV_COLUMNS.filter(c => !header.includes(c));
-    if (missing.length) return { error: `Missing columns: ${missing.join(', ')}` };
+    const REQUIRED = ['code', 'product'];
+    const missingRequired = REQUIRED.filter(c => !header.includes(c));
+    if (missingRequired.length) return { error: `Missing required columns: ${missingRequired.join(', ')}` };
 
     // Parse a CSV line respecting quoted fields
     const parseLine = (line) => {
@@ -136,7 +132,7 @@ function CSVImportModal({ onImport, onClose }) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url;
     a.download = 'ganpati-labels-sample.csv'; a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 200);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   const handleImport = () => {
@@ -829,24 +825,22 @@ export default function Dashboard() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url;
     a.download = `ganpati-labels-${Date.now()}.json`; a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 200);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
     toast.success('JSON exported');
   }, [pages, currentTemplateName]);
 
   const handleCSVExport = useCallback(() => {
     const allLabels = pages.flat();
-    const header = 'manufacturer,logoUrl,code,product,description,price,productUrl';
+    const header = CSV_COLUMNS.join(',');
     const rows = allLabels.map(l =>
-      [l.manufacturer, l.logoUrl, l.code, l.product, l.description, l.price, l.productUrl]
-        .map(v => `"${(v || '').replace(/"/g, '""')}"`)
-        .join(',')
+      CSV_COLUMNS.map(c => `"${(l[c] || '').replace(/"/g, '""')}"`).join(',')
     );
     const csv = [header, ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url;
     a.download = `ganpati-labels-${Date.now()}.csv`; a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 200);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
     toast.success('CSV exported');
   }, [pages]);
 
