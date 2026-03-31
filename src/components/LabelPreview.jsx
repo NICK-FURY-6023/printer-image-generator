@@ -169,11 +169,11 @@ export default function LabelPreview({
           pdf.setLineWidth(0.35);
           pdf.rect(cx, cy, CW, CH);
 
-          // ── LEFT VERTICAL STRIP — white with black rotated model number ──
+          // ── RIGHT VERTICAL STRIP — white with black rotated model number ──
           const STRIP_W = 5.5;
           pdf.setDrawColor(0, 0, 0);
           pdf.setLineWidth(0.12);
-          pdf.line(cx + STRIP_W, cy, cx + STRIP_W, cy + CH);
+          pdf.line(cx + CW - STRIP_W, cy, cx + CW - STRIP_W, cy + CH);
 
           const code = label.code?.trim() || '';
           if (code) {
@@ -186,11 +186,11 @@ export default function LabelPreview({
             while (pdf.getTextWidth(codeText) > maxCodeW && codeText.length > 3) {
               codeText = codeText.slice(0, -1);
             }
-            pdf.text(codeText, cx + STRIP_W / 2, cy + CH / 2, { angle: 90, align: 'center' });
+            pdf.text(codeText, cx + CW - STRIP_W / 2, cy + CH / 2, { angle: -90, align: 'center' });
           }
 
-          // Content area after the strip
-          const contentX = cx + STRIP_W + 0.8;
+          // Content area (left of the strip)
+          const contentX = cx + 0.8;
           const contentW = CW - STRIP_W - 1.5;
           let curY = cy + 0.5;
 
@@ -237,7 +237,7 @@ export default function LabelPreview({
 
           curY += TOP_H;
           pdf.setLineWidth(0.12);
-          pdf.line(cx + STRIP_W, curY, cx + CW, curY);
+          pdf.line(cx, curY, cx + CW - STRIP_W, curY);
           curY += 0.3;
 
           // ── TABLE: Size | Qty | MRP ──
@@ -300,7 +300,7 @@ export default function LabelPreview({
 
           curY += TABLE_H + 0.5;
           pdf.setLineWidth(0.12);
-          pdf.line(cx + STRIP_W, curY, cx + CW, curY);
+          pdf.line(cx, curY, cx + CW - STRIP_W, curY);
           curY += 0.5;
 
           // ── PRODUCT NAME + DESCRIPTION + PRODUCT IMAGE ──
@@ -377,7 +377,7 @@ export default function LabelPreview({
           // ── FOOTER — 3 lines: Company/India, MfgDate/Email, Phone ──
           const footerTop = cy + CH - 6.5;
           pdf.setLineWidth(0.1);
-          pdf.line(cx + STRIP_W, footerTop, cx + CW, footerTop);
+          pdf.line(cx, footerTop, cx + CW - STRIP_W, footerTop);
           const ftX = contentX + 0.3; // inset from edges
           const ftW = contentW - 0.6;
 

@@ -73,24 +73,6 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
       WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact',
     }}>
 
-      {/* ── LEFT VERTICAL STRIP — Model Number (rotated 90°, centered) ── */}
-      <div style={{
-        width: '5.5mm', flexShrink: 0, borderRight: B,
-        background: '#fff', color: '#000',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        overflow: 'hidden', position: 'relative',
-      }}>
-        <span style={{
-          transform: 'rotate(-90deg)',
-          whiteSpace: 'nowrap',
-          fontSize: s(5), fontWeight: 900,
-          letterSpacing: '0.04em',
-          maxWidth: '42mm', overflow: 'hidden', textOverflow: 'ellipsis',
-        }}>
-          {code || (isEmpty ? '' : 'MODEL')}
-        </span>
-      </div>
-
       {/* ── MAIN CONTENT AREA ── */}
       <div style={{
         flex: '1 1 auto', display: 'flex', flexDirection: 'column',
@@ -247,6 +229,24 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
           </div>
         </div>
 
+      </div>
+
+      {/* ── RIGHT VERTICAL STRIP — Model Number (rotated 90°, centered) ── */}
+      <div style={{
+        width: '5.5mm', flexShrink: 0, borderLeft: B,
+        background: '#fff', color: '#000',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden', position: 'relative',
+      }}>
+        <span style={{
+          transform: 'rotate(90deg)',
+          whiteSpace: 'nowrap',
+          fontSize: s(5), fontWeight: 900,
+          letterSpacing: '0.04em',
+          maxWidth: '42mm', overflow: 'hidden', textOverflow: 'ellipsis',
+        }}>
+          {code || (isEmpty ? '' : 'MODEL')}
+        </span>
       </div>
     </div>
   );
