@@ -73,6 +73,23 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
       WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact',
     }}>
 
+      {/* ── LEFT VERTICAL STRIP — Model Number (rotated, centered) ── */}
+      <div style={{
+        width: '5.5mm', flexShrink: 0, borderRight: B,
+        background: '#fff', color: '#000',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden', position: 'relative',
+      }}>
+        <span style={{
+          transform: 'rotate(-90deg)',
+          whiteSpace: 'nowrap',
+          fontSize: s(5), fontWeight: 900,
+          letterSpacing: '0.04em',
+        }}>
+          {code || (isEmpty ? '' : 'MODEL')}
+        </span>
+      </div>
+
       {/* ── MAIN CONTENT AREA ── */}
       <div style={{
         flex: '1 1 auto', display: 'flex', flexDirection: 'column',
@@ -138,7 +155,7 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
                 <td style={{ borderRight: BT, padding: '0.5mm 0.5mm', fontSize: s(5), verticalAlign: 'middle', height: '4mm' }}>{size || '—'}</td>
                 <td style={{ borderRight: BT, padding: '0.5mm 0.5mm', fontSize: s(5), verticalAlign: 'middle', height: '4mm' }}>{qty || '—'}</td>
                 <td style={{ padding: '0.3mm 0.5mm', fontWeight: 800, fontSize: s(5.5), verticalAlign: 'middle', height: '4mm' }}>
-                  {price ? `\u20B9${price}` : '—'}
+                  {price ? `\u20B9${price.replace(/^[\s₹Rs.]+/i, '').trim()}` : '—'}
                   {price && (
                     <div style={{ fontSize: s(2.8), fontWeight: 400, marginTop: '0.2mm', lineHeight: 1 }}>(Incl. of All Taxes)</div>
                   )}
@@ -229,23 +246,6 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
           </div>
         </div>
 
-      </div>
-
-      {/* ── RIGHT VERTICAL STRIP — Model Number (rotated, centered) ── */}
-      <div style={{
-        width: '5.5mm', flexShrink: 0, borderLeft: B,
-        background: '#fff', color: '#000',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        overflow: 'hidden', position: 'relative',
-      }}>
-        <span style={{
-          transform: 'rotate(-90deg)',
-          whiteSpace: 'nowrap',
-          fontSize: s(5), fontWeight: 900,
-          letterSpacing: '0.04em',
-        }}>
-          {code || (isEmpty ? '' : 'MODEL')}
-        </span>
       </div>
     </div>
   );
