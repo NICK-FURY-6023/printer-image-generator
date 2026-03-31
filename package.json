@@ -7,7 +7,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "generate-hash": "node scripts/generate-hash.js",
-    "build-db": "node scripts/build-jaquar-db.js"
+    "build-db": "node scripts/build-jaquar-db.js",
+    "generate-label": "node scripts/generate-label-pdf.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
