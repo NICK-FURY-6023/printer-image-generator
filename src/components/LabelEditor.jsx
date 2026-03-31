@@ -9,6 +9,7 @@ const FIELDS = [
   { key: 'qty',          label: 'Qty',                 placeholder: 'e.g. 1',                                span: 1 },
   { key: 'product',      label: 'Product Name',        placeholder: 'e.g. Concealed Body Diverter',         span: 2, searchable: true },
   { key: 'description',  label: 'Product Description', placeholder: 'e.g. CONCEALED BODY FOR SINGLE LEVER HIGH FLOW DIVERTER...', span: 2 },
+  { key: 'productImage', label: 'Product Image URL',   placeholder: 'Paste product photo URL',              span: 2 },
 ];
 
 /* ── Jaquar Search helpers ── */
@@ -165,7 +166,7 @@ function JaquarSearchDropdown({ results, loading, liveLoading, onSelect, visible
 }
 
 const emptyLabel = () => ({
-  product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '', size: '', qty: '',
+  product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '', productImage: '', size: '', qty: '',
 });
 const isFilled   = (l) => !!(l.product?.trim() || l.code?.trim() || l.price?.trim());
 

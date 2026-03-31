@@ -110,9 +110,10 @@ export default function LabelPreview({
       // ── Pre-load images for ALL pages ──
       const logoCache = {};
       const qrCache = {};
+      const prodImgCache = {};
       for (const pageLabels of allPages) {
         const safeLabels = Array.from({ length: 12 }, (_, i) => ({
-          product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '',
+          product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '', productImage: '',
           ...(pageLabels[i] || {})
         }));
         for (const l of safeLabels) {
@@ -125,6 +126,10 @@ export default function LabelPreview({
             try { qrCache[url] = await QRLib.toDataURL(url, { width: 200, margin: 0, errorCorrectionLevel: 'M' }); }
             catch { /* skip */ }
           }
+        }
+        for (const l of safeLabels) {
+          const url = l.productImage?.trim();
+          if (url && !prodImgCache[url]) prodImgCache[url] = await loadImg(url);
         }
       }
 
@@ -249,43 +254,57 @@ export default function LabelPreview({
           pdf.line(cx + STRIP_W, curY, cx + CW, curY);
           curY += 0.3;
 
-          // ── PRODUCT NAME — bold, centered ──
+          // ── PRODUCT NAME + DESCRIPTION + PRODUCT IMAGE ──
           const productName = label.product?.trim() || '';
+          const desc = label.description?.trim() || '';
+          const prodImgUrl = label.productImage?.trim() || '';
+          const prodImg = prodImgUrl ? prodImgCache[prodImgUrl] : null;
+          const footerY = cy + CH - 3.5;
+          const midAvailH = footerY - curY - 0.6;
+
+          // Product image on right side
+          const IMG_COL_W = prodImg ? 14 : 0;
+          const textW = contentW - IMG_COL_W - (prodImg ? 1 : 0);
+
+          if (prodImg) {
+            const imgX = contentX + contentW - IMG_COL_W;
+            pdf.setLineWidth(0.1);
+            pdf.line(imgX - 0.5, curY, imgX - 0.5, footerY - 0.3);
+            const fit = fitImg(prodImg, IMG_COL_W - 1, midAvailH - 1);
+            try {
+              pdf.addImage(prodImg.data, 'PNG',
+                imgX + (IMG_COL_W - fit.w) / 2,
+                curY + (midAvailH - fit.h) / 2,
+                fit.w, fit.h);
+            } catch { /* skip */ }
+          }
+
+          // Product name
+          let textY = curY + 0.5;
           if (productName) {
             pdf.setFontSize(s(4.5));
             pdf.setFont('helvetica', 'bold');
             const nameText = productName.toUpperCase();
-            const truncated = pdf.splitTextToSize(nameText, contentW - 2)[0] || nameText;
-            pdf.text(truncated, contentX + contentW / 2, curY + 1.8, { align: 'center' });
-            curY += 3;
-            pdf.setLineWidth(0.1);
-            pdf.line(cx + STRIP_W, curY, cx + CW, curY);
-            curY += 0.3;
+            const truncated = pdf.splitTextToSize(nameText, textW - 1)[0] || nameText;
+            pdf.text(truncated, contentX + 0.5, textY + 1.5);
+            textY += 3;
           }
 
-          // ── PRODUCT DESCRIPTION — centered, ALL CAPS, smaller ──
-          const desc = label.description?.trim() || '';
+          // Description
           if (desc) {
             pdf.setFontSize(s(3.5));
             pdf.setFont('helvetica', 'bold');
-            const descLines = pdf.splitTextToSize(desc.toUpperCase(), contentW - 2).slice(0, 2);
-            const lineH = s(3.5) * PT2MM * 1.25;
-            const descBlockH = descLines.length * lineH;
-            const availH = (cy + CH) - curY - 4;
-            const descY = curY + Math.max(0, (availH - descBlockH) / 2);
-            pdf.text(descLines, contentX + contentW / 2, descY, { align: 'center', lineHeightFactor: 1.25 });
-            curY += Math.max(descBlockH, availH) + 0.3;
+            const descLines = pdf.splitTextToSize(desc.toUpperCase(), textW - 1).slice(0, 2);
+            pdf.text(descLines, contentX + 0.5, textY + 1, { lineHeightFactor: 1.25 });
           }
 
-          // ── FOOTER — Manufactured by + Address (always visible, bold) ──
-          const footerY = cy + CH - 3.5;
+          // ── FOOTER — Jaquar & Co. Pvt. Ltd. + Made in India ──
           pdf.setLineWidth(0.1);
           pdf.line(cx + STRIP_W, footerY - 0.3, cx + CW, footerY - 0.3);
           pdf.setFontSize(s(3.2));
           pdf.setFont('helvetica', 'bold');
-          const brand = label.manufacturer?.trim();
-          pdf.text(`Manufactured by: ${brand || '___________'}`, contentX, footerY + 0.8);
-          pdf.text('Address: India', contentX, footerY + 2.3);
+          pdf.text('Jaquar & Co. Pvt. Ltd.', contentX, footerY + 0.8);
+          pdf.text('Made in India', contentX + contentW, footerY + 0.8, { align: 'right' });
         }
         } // end pageIdx loop
       }

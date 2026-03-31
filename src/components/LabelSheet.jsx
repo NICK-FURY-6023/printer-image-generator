@@ -6,10 +6,10 @@
  * │ O │ │ Size │ Qty │ MRP (Per Piece) │        │
  * │ D │ │ 15mm │  1  │   ₹3,800.00    │        │
  * │ E │──────────────────────────────────────────│
- * │ L │ Product Name (bold)                      │
- * │   │ CONCEALED BODY FOR SINGLE LEVER HIGH...  │
+ * │ L │ Product Name       │ [PRODUCT IMAGE]    │
+ * │   │ Description text   │                    │
  * │   │──────────────────────────────────────────│
- * │   │ Mfg by: Company | Address: India         │
+ * │   │ Jaquar & Co. Pvt. Ltd.  |  Made in India│
  * └───┴──────────────────────────────────────────┘
  */
 
@@ -45,13 +45,16 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
   const qty = label.qty?.trim() || '';
   const logoUrl = label.logoUrl?.trim() || '/jaquar-logo.png';
   const productUrl = label.productUrl?.trim() || '';
+  const productImage = label.productImage?.trim() || '';
   const qrDataUrl = useQRCode(productUrl);
   const s = (pt) => `${pt * fontScale}pt`;
   const B = '0.18mm solid #000';
   const BT = '0.12mm solid #000';
   const [logoError, setLogoError] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const isEmpty = !code && !product && !price && !description;
+  const hasProductImg = productImage && !imgError;
 
   return (
     <div style={{
@@ -153,52 +156,66 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
           </table>
         </div>
 
-        {/* ── PRODUCT NAME — Bold, centered ── */}
-        {product && (
+        {/* ── PRODUCT NAME + DESCRIPTION + PRODUCT IMAGE ── */}
+        <div style={{
+          flex: '1 1 auto', display: 'flex', overflow: 'hidden',
+          borderBottom: BT,
+        }}>
+          {/* Left: Text content */}
           <div style={{
-            flexShrink: 0, borderBottom: BT,
-            padding: '0.3mm 1.5mm', textAlign: 'center',
+            flex: '1 1 auto', display: 'flex', flexDirection: 'column',
+            justifyContent: 'center', padding: '0.3mm 1.5mm',
+            overflow: 'hidden', minWidth: 0,
           }}>
-            <span style={{
-              fontSize: s(5), fontWeight: 900,
-              textTransform: 'uppercase', lineHeight: 1.2,
-              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-              display: 'block',
-            }}>
-              {product}
-            </span>
+            {product && (
+              <span style={{
+                fontSize: s(5), fontWeight: 900,
+                textTransform: 'uppercase', lineHeight: 1.2,
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                display: 'block',
+              }}>
+                {product}
+              </span>
+            )}
+            {(description || (!product && !isEmpty)) && (
+              <span style={{
+                fontSize: s(3.8), fontWeight: 600,
+                lineHeight: 1.2, textTransform: 'uppercase',
+                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                overflow: 'hidden', wordBreak: 'break-word',
+                marginTop: product ? '0.3mm' : 0,
+              }}>
+                {description || ''}
+              </span>
+            )}
           </div>
-        )}
 
-        {/* ── PRODUCT DESCRIPTION — Center, ALL CAPS, smaller ── */}
-        {(description || (!product && !isEmpty)) && (
-          <div style={{
-            flex: '1 1 auto', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            borderBottom: BT, padding: '0.3mm 1.5mm',
-            overflow: 'hidden', textAlign: 'center',
-          }}>
-            <span style={{
-              fontSize: s(4), fontWeight: 600,
-              lineHeight: 1.25, textTransform: 'uppercase',
-              display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-              overflow: 'hidden', wordBreak: 'break-word',
+          {/* Right: Product Image */}
+          {hasProductImg && (
+            <div style={{
+              flex: '0 0 auto', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', padding: '0.5mm',
+              borderLeft: BT, width: '14mm',
             }}>
-              {description || ''}
-            </span>
-          </div>
-        )}
+              <img src={productImage} alt="Product" crossOrigin="anonymous"
+                onError={() => setImgError(true)}
+                style={{
+                  maxHeight: '100%', maxWidth: '13mm',
+                  objectFit: 'contain',
+                }} />
+            </div>
+          )}
+        </div>
 
-        {/* Fill remaining space if no description */}
-        {!description && product && <div style={{ flex: '1 1 auto' }} />}
-
-        {/* ── FOOTER — Manufacturer + Address (always visible, bold) ── */}
+        {/* ── FOOTER — Company name + Made in India ── */}
         <div style={{
           flexShrink: 0, padding: '0.4mm 1mm 0.3mm',
           fontSize: s(3.5), lineHeight: 1.3, color: '#000',
           fontWeight: 700, borderTop: BT,
+          display: 'flex', justifyContent: 'space-between',
         }}>
-          <span style={{ display: 'block' }}>Manufactured by: {brand || '___________'}</span>
-          <span style={{ display: 'block' }}>Address: India</span>
+          <span>Jaquar & Co. Pvt. Ltd.</span>
+          <span>Made in India</span>
         </div>
 
       </div>
@@ -215,11 +232,12 @@ const LabelCell = memo(function LabelCell({ label, fontScale = 1, fieldStyles })
   prev.label.qty === next.label.qty &&
   prev.label.logoUrl === next.label.logoUrl &&
   prev.label.manufacturer === next.label.manufacturer &&
-  prev.label.productUrl === next.label.productUrl
+  prev.label.productUrl === next.label.productUrl &&
+  prev.label.productImage === next.label.productImage
 );
 
 // Bug #4 fix: proper default label so .trim() never hits undefined
-const defaultLabel = { product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '', size: '', qty: '' };
+const defaultLabel = { product: '', code: '', price: '', manufacturer: '', logoUrl: '', description: '', productUrl: '', productImage: '', size: '', qty: '' };
 
 export default function LabelSheet({ labels, extraTopMargin = 0, fontScale = 1, fieldStyles }) {
   const safeLabels = Array.from({ length: 12 }, (_, i) => ({ ...defaultLabel, ...(labels[i] || {}) }));
