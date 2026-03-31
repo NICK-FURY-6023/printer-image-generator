@@ -281,7 +281,7 @@ export default function LabelPreview({
           const desc = label.description?.trim() || '';
           const prodImgUrl = label.productImage?.trim() || '';
           const prodImg = prodImgUrl ? prodImgCache[prodImgUrl] : null;
-          const footerY = cy + CH - 5;
+          const footerY = cy + CH - 6.5; // must match footerTop below
           const midAvailH = footerY - curY - 0.6;
 
           // Product image on right side
@@ -320,8 +320,7 @@ export default function LabelPreview({
             pdf.text(descLines, contentX + 0.5, textY + 1, { lineHeightFactor: 1.25 });
           }
 
-          // ── FOOTER — Two lines: Company/India + Mfg date/Customer Care ──
-          // Footer — 3 lines
+          // ── FOOTER — 3 lines: Company/India, MfgDate/Email, Phone ──
           const footerTop = cy + CH - 6.5;
           pdf.setLineWidth(0.1);
           pdf.line(cx + STRIP_W, footerTop, cx + CW, footerTop);

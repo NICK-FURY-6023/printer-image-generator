@@ -526,6 +526,8 @@ export default function Dashboard() {
     return [initialLabels()];
   });
   const [currentPage, setCurrentPage] = useState(0);
+  const pagesRef = useRef(pages);
+  useEffect(() => { pagesRef.current = pages; }, [pages]);
 
   // ── Undo / Redo (must be before setLabels which depends on pushUndo) ──
   const undoStack = useRef([]);
@@ -541,28 +543,28 @@ export default function Dashboard() {
   const handleUndo = useCallback(() => {
     if (!undoStack.current.length) { toast('Nothing to undo'); return; }
     const prev = undoStack.current.pop();
-    redoStack.current.push(JSON.stringify(pages));
+    redoStack.current.push(JSON.stringify(pagesRef.current));
     skipHistory.current = true;
     setPages(JSON.parse(prev));
     skipHistory.current = false;
     toast('Undo', { duration: 1000 });
-  }, [pages]);
+  }, []);
 
   const handleRedo = useCallback(() => {
     if (!redoStack.current.length) { toast('Nothing to redo'); return; }
     const next = redoStack.current.pop();
-    undoStack.current.push(JSON.stringify(pages));
+    undoStack.current.push(JSON.stringify(pagesRef.current));
     skipHistory.current = true;
     setPages(JSON.parse(next));
     skipHistory.current = false;
     toast('Redo', { duration: 1000 });
-  }, [pages]);
+  }, []);
 
   // Current page's labels (derived)
   const labels = pages[currentPage] || initialLabels();
   // Bug #2 fix: use functional setPages to avoid stale currentPage
   const setLabels = useCallback((newLabelsOrFn) => {
-    pushUndo(pages);
+    pushUndo(pagesRef.current);
     setPages(prev => {
       const updated = [...prev];
       const page = Math.min(currentPage, prev.length - 1);
@@ -570,7 +572,7 @@ export default function Dashboard() {
       updated[page] = typeof newLabelsOrFn === 'function' ? newLabelsOrFn(prev[page]) : newLabelsOrFn;
       return updated;
     });
-  }, [currentPage, pages, pushUndo]);
+  }, [currentPage, pushUndo]);
 
   // Bug #1 fix: use functional update to avoid stale pages.length
   const addPage = useCallback(() => {
@@ -658,9 +660,7 @@ export default function Dashboard() {
 
   // ── Cloud sync via Supabase Realtime (WebSocket) ──
   const cloudDraftId = useRef(null);
-  const pagesRef = useRef(pages);
   const supabase = useMemo(() => getSupabaseClient(), []);
-  useEffect(() => { pagesRef.current = pages; }, [pages]);
 
   useEffect(() => {
     if (!supabase || !token) return;
@@ -809,7 +809,6 @@ export default function Dashboard() {
   }, [setLabels, currentPage]);
 
   const handleTemplateApply = useCallback((template) => {
-    pushUndo(pages);
     const newLabels = Array.from({ length: 12 }, (_, i) => ({
       ...emptyLabel(),
       ...(template.labels[i] || {}),
@@ -817,7 +816,7 @@ export default function Dashboard() {
     setLabels(newLabels);
     setCurrentTemplateName(template.name);
     toast.success(`Applied "${template.name}"`);
-  }, [pushUndo, pages, setLabels]);
+  }, [setLabels]);
 
   const handleJSONExport = useCallback(() => {
     const data = { pages, templateName: currentTemplateName || 'Untitled', exportedAt: new Date().toISOString() };

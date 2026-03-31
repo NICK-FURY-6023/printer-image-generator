@@ -197,6 +197,7 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
   const [showDropdown, setShowDropdown] = useState(false);
   const [fetchingDetail, setFetchingDetail] = useState(false);
   const [productDB, setProductDB] = useState(_productDB); // sync init if already loaded
+  const latestSelectRef = useRef(0); // race condition guard for async detail fetch
   const debouncedQuery = useDebounce(searchQuery, 150);
   const wrapperRef = useRef(null);
 
@@ -284,6 +285,9 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
     setSearchQuery('');
     setSearchResults([]);
 
+    // Race condition guard: track this selection's generation
+    const selectId = ++latestSelectRef.current;
+
     // Build product URL for Jaquar website
     const jaquarUrl = product.url ? `https://www.jaquar.com${product.url}` : '';
 
@@ -314,6 +318,8 @@ function LabelCard({ index, label, onChange, onFillMulti, onDuplicateToAll, onRe
     if (product.url) {
       setFetchingDetail(true);
       const detail = await fetchJaquarProduct(product.url).catch(() => null);
+      // Abort if user selected a different product while we were fetching
+      if (selectId !== latestSelectRef.current) { setFetchingDetail(false); return; }
       if (detail) {
         const extras = {};
         if (detail.description) extras.description = detail.description;

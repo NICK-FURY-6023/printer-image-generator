@@ -28,8 +28,12 @@ function parseProducts(html) {
     const urlMatch = block.match(/<a href="(\/en\/[^"]*\?Id=\d+)"/);
     const productUrl = urlMatch ? urlMatch[1] : '';
 
+    // Extract price from search results
+    const priceMatch = block.match(/actual-price[^>]*>[\s\S]*?(?:&#x20B9;|₹)\s*([\d,]+(?:\.\d+)?)/);
+    const price = priceMatch ? parseFloat(priceMatch[1].replace(/,/g, '')) : null;
+
     if (name || code) {
-      products.push({ id, name, code, image, url: productUrl });
+      products.push({ id, name, code, image, url: productUrl, price });
     }
   }
   return products;
@@ -70,23 +74,26 @@ module.exports = async (req, res) => {
     const html = await fetchSearch(q);
     let products = parseProducts(html);
 
-    // If no results and query looks like a code with trailing letter suffix,
+    // If no results and query looks like a code with known trailing suffix letter,
     // retry without the suffix (e.g. ALD-CHR-055N → ALD-CHR-055)
     if (products.length === 0 && looksLikeCode(q)) {
-      const stripped = q.replace(/[A-Z]$/i, '');
-      if (stripped !== q && stripped.length >= 3) {
+      const knownSuffix = /[NMSFBT]$/i;
+      const stripped = knownSuffix.test(q) ? q.slice(0, -1) : null;
+      if (stripped && stripped !== q && stripped.length >= 3) {
         const html2 = await fetchSearch(stripped);
         products = parseProducts(html2);
       }
     }
 
-    // If query is a specific code, move exact/closest match to top
+    // If query is a specific code, sort by match quality: exact > prefix > contains
     if (looksLikeCode(q) && products.length > 1) {
       const upper = q.toUpperCase();
       products.sort((a, b) => {
-        const aMatch = a.code.toUpperCase().startsWith(upper) ? 0 : 1;
-        const bMatch = b.code.toUpperCase().startsWith(upper) ? 0 : 1;
-        return aMatch - bMatch;
+        const ac = a.code.toUpperCase();
+        const bc = b.code.toUpperCase();
+        const aScore = ac === upper ? 0 : ac.startsWith(upper) ? 1 : 2;
+        const bScore = bc === upper ? 0 : bc.startsWith(upper) ? 1 : 2;
+        return aScore - bScore;
       });
     }
 

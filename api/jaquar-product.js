@@ -56,13 +56,25 @@ module.exports = async (req, res) => {
     const image = imgMatch ? imgMatch[1] : '';
 
     // Extract MRP price (geo-restricted to India — we spoof Indian IP)
+    // Multiple patterns for robustness against HTML structure changes
     let price = null;
     let priceRaw = null;
-    const priceMatch = html.match(/class="price-value-\d+"[^>]*content="([\d.]+)"[^>]*>\s*([\s\S]*?)<\/span>/);
+    let priceMatch = html.match(/class="price-value-\d+"[^>]*content="([\d.]+)"[^>]*>\s*([\s\S]*?)<\/span>/);
+    if (!priceMatch) {
+      // Fallback: content attribute in different order
+      priceMatch = html.match(/content="([\d.]+)"[^>]*class="price-value-\d+"[^>]*>\s*([\s\S]*?)<\/span>/);
+    }
     if (priceMatch) {
       priceRaw = parseFloat(priceMatch[1]);
       const priceText = priceMatch[2].replace(/[^\d.,₹\s]/g, '').trim();
       price = priceText || `₹ ${priceRaw.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+    } else {
+      // Last resort: find MRP pattern anywhere in page
+      const mrpMatch = html.match(/MRP[:\s]*(?:&#x20B9;|₹)\s*([\d,]+(?:\.\d+)?)/i);
+      if (mrpMatch) {
+        priceRaw = parseFloat(mrpMatch[1].replace(/,/g, ''));
+        price = `₹ ${priceRaw.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+      }
     }
 
     res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=172800');
