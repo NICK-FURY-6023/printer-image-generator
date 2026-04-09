@@ -45,8 +45,9 @@
 .sheet-18 {
   grid-template-columns: repeat(3, 63.5mm) !important;
   grid-template-rows: repeat(6, 46.6mm) !important;
-  padding: 7.45mm 6mm !important;
-  gap: 0.5mm !important;
+  padding: 8.7mm 5.75mm !important;
+  row-gap: 0 !important;
+  column-gap: 4mm !important;
   justify-content: center !important;
 }
 .sheet > * {
