@@ -29,7 +29,7 @@ export const LAYOUTS = {
     count: 18,
     labelWidth: '63.5mm',
     labelHeight: '46.6mm',
-    paddingTop: '10mm',
+    paddingTop: '7.45mm',
     paddingSide: '6mm',
     gap: '0.5mm',
     cssClass: 'sheet-18',
